@@ -1,0 +1,204 @@
+/* Custom Styles */
+:root {
+    --primary-color: #4361ee;
+    --secondary-color: #3a0ca3;
+    --success-color: #4cc9f0;
+    --danger-color: #f72585;
+    --warning-color: #f8961e;
+    --info-color: #7209b7;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+}
+
+.navbar {
+    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+}
+
+.card {
+    border: none;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    transition: all 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 2rem 0 rgba(58, 59, 69, 0.2);
+}
+
+.card-header {
+    border-bottom: 1px solid #e3e6f0;
+    background-color: #f8f9fc;
+}
+
+.badge {
+    font-size: 0.75em;
+    font-weight: 500;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    color: #5a5c69;
+}
+
+.btn {
+    font-weight: 500;
+    border-radius: 0.35rem;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+}
+
+.status-badge {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    border-radius: 0.25rem;
+}
+
+.status-pending {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.status-approved {
+    background-color: #d1e7dd;
+    color: #0f5132;
+}
+
+.status-rejected {
+    background-color: #f8d7da;
+    color: #842029;
+}
+
+.status-expired {
+    background-color: #e2e3e5;
+    color: #41464b;
+}
+
+.status-suspended {
+    background-color: #f8d7da;
+    color: #842029;
+}
+
+.status-active {
+    background-color: #d1e7dd;
+    color: #0f5132;
+}
+
+.share-buttons .btn {
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 0.25rem;
+}
+
+/* Dashboard cards */
+.card.border-left-primary {
+    border-left: 0.25rem solid var(--primary-color) !important;
+}
+
+.card.border-left-success {
+    border-left: 0.25rem solid var(--success-color) !important;
+}
+
+.card.border-left-warning {
+    border-left: 0.25rem solid var(--warning-color) !important;
+}
+
+.card.border-left-danger {
+    border-left: 0.25rem solid var(--danger-color) !important;
+}
+
+/* Form validation */
+.is-invalid {
+    border-color: var(--danger-color);
+}
+
+.invalid-feedback {
+    color: var(--danger-color);
+    font-size: 0.875em;
+}
+
+/* Toast notifications */
+.toast-container {
+    z-index: 9999;
+}
+
+/* Responsive tables */
+@media (max-width: 768px) {
+    .table-responsive {
+        border: 0;
+    }
+    
+    .table-responsive table {
+        width: 100%;
+    }
+    
+    .table-responsive th,
+    .table-responsive td {
+        white-space: nowrap;
+    }
+}
+
+/* Loading spinner */
+.spinner-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+}
+
+/* Profile image */
+.profile-image {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid var(--primary-color);
+}
+
+/* Job/Offer cards */
+.job-card, .offer-card {
+    transition: transform 0.2s;
+}
+
+.job-card:hover, .offer-card:hover {
+    transform: translateY(-2px);
+}
+
+/* Modal customizations */
+.modal-header {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+/* Tab customizations */
+.nav-tabs .nav-link {
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+    border-bottom-color: transparent;
+}
+
+/* Filter controls */
+.filter-card {
+    background-color: #f8f9fc;
+    border-left: 3px solid var(--info-color);
+}
