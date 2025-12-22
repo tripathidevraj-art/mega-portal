@@ -12,7 +12,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom CSS -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
-    
     @stack('styles')
 </head>
 <body>
@@ -20,7 +19,8 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
             <a class="navbar-brand" href="{{ route('home') }}">
-                <i class="fas fa-briefcase"></i> Job & Offer Portal
+                <i class="fas fa-briefcase"></i> Job & Promos Portal
+                 <!-- <img src="https://innoricsystems.in/uploads/ngo-logo.png" class="" alt="Logo"> -->
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -31,7 +31,7 @@
                         <a class="nav-link" href="{{ route('jobs.index') }}">Jobs</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('offers.index') }}">Offers</a>
+                        <a class="nav-link" href="{{ route('offers.index') }}">Promos</a>
                     </li>
                   @auth
                         {{-- Super Admin --}}

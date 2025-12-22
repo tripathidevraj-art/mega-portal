@@ -1,23 +1,46 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">{{ __('Dashboard') }}</div>
 
-                <div class="card-body">
-                    @if (session('status'))
-                        <div class="alert alert-success" role="alert">
-                            {{ session('status') }}
-                        </div>
-                    @endif
+{{-- ================= GUEST VIEW ================= --}}
+@guest
+<div class="bg-dark text-light py-5">
+    <div class="container text-center">
+        <h1 class="display-4 fw-bold">Welcome to Job & Offer Portal 👋</h1>
+        <p class="lead mt-3">
+            Find jobs, post offers, and grow your career.
+        </p>
 
-                    {{ __('You are logged in!') }}
-                </div>
-            </div>
+        <div class="mt-4">
+            <a href="{{ route('login') }}" class="btn btn-primary btn-lg me-2">
+                Login
+            </a>
+            <a href="{{ route('register') }}" class="btn btn-outline-light btn-lg">
+                Register
+            </a>
         </div>
     </div>
 </div>
+@endguest
+
+
+{{-- ================= AUTH VIEW ================= --}}
+@auth
+<!-- Hero Section -->
+<div class="bg-dark text-light py-5">
+    <div class="container text-center">
+        <h1 class="display-4 fw-bold">
+            Welcome Back, {{ Auth::user()->name }} 🎉
+        </h1>
+        <p class="lead mt-3">
+            Manage jobs, offers, and your profile in one place.
+        </p>
+        <a href="dashboard" class="btn btn-primary btn-lg mt-3">
+            Explore Dashboard
+        </a>
+    </div>
+</div>
+
+@endauth
+
 @endsection
