@@ -24,7 +24,25 @@
             </div>
         </div>
     </div>
-
+<div class="col-xl-3 col-md-6 mb-4">
+    <div class="card border-left-info shadow h-100 py-2">
+        <div class="card-body">
+            <div class="row no-gutters align-items-center">
+                <div class="col mr-2">
+                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                        Pending Users
+                    </div>
+                    <div class="h5 mb-0 font-weight-bold text-gray-800">
+                        {{ $stats['pending_users'] }}
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <i class="fas fa-user-clock fa-2x text-gray-300"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
     <div class="col-xl-3 col-md-6 mb-4">
         <div class="card border-left-success shadow h-100 py-2">
             <div class="card-body">
@@ -196,7 +214,7 @@
                             @forelse($recentActivities as $activity)
                                 <tr>
                                     <td>
-                                        <strong>{{ $activity->user->name ?? 'N/A' }}</strong><br>
+                                        <strong>{{ $activity->user->full_name ?? 'Deleted User' }}</strong><br>
                                         <small class="text-muted">{{ $activity->user->email ?? '' }}</small>
                                     </td>
                                     <td>
@@ -208,7 +226,7 @@
                                         @endif
                                     </td>
                                     <td>{{ Str::limit($activity->reason, 50) }}</td>
-                                    <td>{{ $activity->admin->name ?? 'System' }}</td>
+                                    <td>{{ $activity->admin->full_name ?? 'System' }}</td>
                                     <td>{{ $activity->created_at->format('M d, Y H:i') }}</td>
                                 </tr>
                             @empty

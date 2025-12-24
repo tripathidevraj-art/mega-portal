@@ -257,11 +257,12 @@ protected function sendVerificationEmail(User $user)
             return redirect()->route('login')->with('error', 'Invalid verification link.');
         }
 
-        $user->update([
-            'email_verified_at' => now(),
-            'status' => 'verified',
-            'verification_token' => null,
-        ]);
+// Only mark email as verified — keep status as 'pending' until admin approves
+$user->update([
+    'email_verified_at' => now(),
+    'verification_token' => null,
+    // DO NOT change status here
+]);
 
         // Log verification activity
         UserActivityLog::create([

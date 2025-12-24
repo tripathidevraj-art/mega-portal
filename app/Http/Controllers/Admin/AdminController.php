@@ -15,17 +15,18 @@ class AdminController extends Controller
 {
     public function dashboard()
     {
-        $stats = [
-            'total_users' => User::where('role', 'user')->count(),
-            'active_users' => User::where('role', 'user')->where('status', 'active')->count(),
-            'suspended_users' => User::where('role', 'user')->where('status', 'suspended')->count(),
-            'pending_jobs' => JobPosting::pending()->count(),
-            'pending_offers' => ProductOffer::pending()->count(),
-            'expired_jobs' => JobPosting::expired()->count(),
-            'expired_offers' => ProductOffer::expired()->count(),
-            'total_jobs' => JobPosting::count(),
-            'total_offers' => ProductOffer::count(),
-        ];
+    $stats = [
+        'total_users' => User::where('role', 'user')->count(),
+        'pending_users' => User::where('role', 'user')->where('status', 'pending')->count(),
+        'active_users' => User::where('role', 'user')->where('status', 'verified')->count(), // ✅ FIXED
+        'suspended_users' => User::where('role', 'user')->where('status', 'suspended')->count(),
+        'pending_jobs' => JobPosting::pending()->count(),
+        'pending_offers' => ProductOffer::pending()->count(),
+        'expired_jobs' => JobPosting::expired()->count(),
+        'expired_offers' => ProductOffer::expired()->count(),
+        'total_jobs' => JobPosting::count(),
+        'total_offers' => ProductOffer::count(),
+    ];
 
         $recentActivities = UserActivityLog::with(['user', 'admin'])
             ->latest()
@@ -34,7 +35,45 @@ class AdminController extends Controller
 
         return view('admin.dashboard', compact('stats', 'recentActivities'));
     }
+public function approveUser(Request $request, $id)
+{
+    $user = User::where('role', 'user')->findOrFail($id);
 
+    if ($user->status !== 'pending') {
+        return back()->with('error', 'User is not pending approval.');
+    }
+
+    $user->update(['status' => 'verified']);
+
+    UserActivityLog::create([
+        'user_id' => $user->id,
+        'admin_id' => auth()->id(),
+        'action_type' => 'activated',
+        'reason' => 'Admin approved user profile',
+    ]);
+
+    return back()->with('success', 'User approved successfully.');
+}
+
+public function rejectUser(Request $request, $id)
+{
+    $user = User::where('role', 'user')->findOrFail($id);
+
+    if ($user->status !== 'pending') {
+        return back()->with('error', 'User is not pending approval.');
+    }
+
+    $user->update(['status' => 'rejected']);
+
+    UserActivityLog::create([
+        'user_id' => $user->id,
+        'admin_id' => auth()->id(),
+        'action_type' => 'suspended',
+        'reason' => 'Admin rejected user profile',
+    ]);
+
+    return back()->with('success', 'User rejected.');
+}
     public function approvalQueue()
     {
         $pendingJobs = JobPosting::pending()->with('user')->latest()->get();

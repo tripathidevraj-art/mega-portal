@@ -22,16 +22,20 @@ class UserActivityLog extends Model
         'metadata' => 'array',
     ];
 
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
+public function user()
+{
+    return $this->belongsTo(User::class)->withDefault([
+        'full_name' => 'Deleted User'
+    ]);
+}
 
-    public function admin()
-    {
-        return $this->belongsTo(User::class, 'admin_id');
-    }
-
+public function admin()
+{
+    return $this->belongsTo(User::class, 'admin_id')->withDefault([
+        'full_name' => 'System'
+    ]);
+}
+    
     public function getActionBadgeClassAttribute()
     {
         $classes = [
