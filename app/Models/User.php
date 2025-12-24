@@ -11,45 +11,56 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable, SoftDeletes;
 
-    protected $fillable = [
-        // Basic Info
-        'full_name',
-        'email',
-        'phone',
-        'date_of_birth',
-        'gender',
-        
-        // Address
-        'country',
-        'current_address',
-        
-        // Professional
-        'occupation',
-        'company',
-        'skills',
-        
-        // Documents
-        'civil_id',
-        'passport_number',
-        'passport_expiry',
-        'residency_type',
-        'residency_expiry',
-        
-        // Volunteer
-        'volunteer_interests',
-        
-        // Account
-        'password',
-        'profile_image',
-        'role',
-        'status',
-        'suspension_reason',
-        'suspended_until',
-        
-        // Email Verification
-        'email_verified_at',
-        'verification_token',
-    ];
+protected $fillable = [
+    // Basic Info
+    'full_name',
+    'email',
+    'phone',
+    'phone_country_code',
+    'whatsapp_country_code',
+    'whatsapp',
+    'date_of_birth',
+    'gender',
+    
+    // Address
+    'country',
+    'state',
+    'city',
+    'zip_code',
+    'current_address',
+    'communication_address',
+    
+    // Professional
+    'designation',           // renamed from occupation
+    'company_name',          // renamed from company
+    'industry_experience',
+    
+    // Documents
+    'civil_id',
+    'civil_id_file_path',    // new file path
+    'passport_number',
+    'passport_expiry',
+    'residency_type',
+    'residency_expiry',
+    
+    // Volunteer
+    'volunteer_interests',
+    
+    // New Section
+    'additional_info',
+    
+    // Account
+    'password',
+    'profile_image',
+    'role',
+    'status',
+    'suspension_reason',
+    'suspended_until',
+    
+    // Email Verification
+    'email_verified_at',
+    'verification_token',
+];
 
     protected $hidden = [
         'password',
@@ -64,8 +75,6 @@ class User extends Authenticatable
         'date_of_birth' => 'date',
         'passport_expiry' => 'date',
         'residency_expiry' => 'date',
-        'skills' => 'array',
-        'volunteer_interests' => 'array',
     ];
 
     // public function isAdmin()

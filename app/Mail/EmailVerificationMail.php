@@ -3,13 +3,12 @@
 namespace App\Mail;
 
 use App\Models\User;
-use Illuminate\Bus\Queueable;
-use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailable; // ← removed Queueable
 use Illuminate\Queue\SerializesModels;
 
 class EmailVerificationMail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use SerializesModels; // ← keep this (for User model)
 
     public $user;
     public $verificationUrl;
@@ -23,10 +22,6 @@ class EmailVerificationMail extends Mailable
     public function build()
     {
         return $this->subject('Verify Your Email - Job & Offer Portal')
-                    ->view('emails.verify-email')
-                    ->with([
-                        'user' => $this->user,
-                        'verificationUrl' => $this->verificationUrl,
-                    ]);
+                    ->view('emails.verify-email');
     }
 }

@@ -55,12 +55,23 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
 Route::post('/register', [RegisterController::class, 'register']);
-
+Route::get('/register/success', [RegisterController::class, 'registrationSuccess'])->name('register.success');
 /*
 |--------------------------------------------------------------------------
 | Password Reset Routes
 |--------------------------------------------------------------------------
 */
+Route::get('/email/verify/{id}/{hash}/{token}', [RegisterController::class, 'verify'])->name('verification.verify');
+Route::post('/email/resend', [RegisterController::class, 'resendVerification'])->name('verification.resend'); // ← ADD THIS
+Route::get('/test-email', function () {
+    $user = \App\Models\User::first();
+    // Override email to your real Gmail
+    $user->email = 'tripathidevraj2205@gmail.com'; // ← CHANGE THIS
+
+    $url = url('/test');
+    \Mail::to($user->email)->send(new \App\Mail\EmailVerificationMail($user, $url));
+    return "Email sent to: " . $user->email;
+});
 Route::get('password/reset', [\App\Http\Controllers\Auth\ForgotPasswordController::class, 'showLinkRequestForm'])
     ->name('password.request');
 

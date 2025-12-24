@@ -2,6 +2,10 @@
     "$schema": "https://www.schemastore.org/package.json",
     "private": true,
     "type": "module",
+    "author": {
+        "name": "Aryan Maurya",
+        "email": "aryanmaurya@innoricsystems.com"
+    },
     "scripts": {
         "build": "vite build",
         "dev": "vite"
