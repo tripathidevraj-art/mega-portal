@@ -18,10 +18,6 @@
                     Please check your inbox and click the verification link to activate your account.
                 </p>
                 
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle me-2"></i>
-                    <strong>Important:</strong> You cannot login until you verify your email address.
-                </div>
                 
                 <div class="mt-4">
                     <a href="{{ route('login') }}" class="btn btn-outline-primary me-2">

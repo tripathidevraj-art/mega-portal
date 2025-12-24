@@ -152,8 +152,8 @@ Route::middleware(['auth', 'admin'])
 // Add these inside Route::middleware(['auth', 'admin'])->group(...)
 Route::post('/users/{id}/approve', [AdminController::class, 'approveUser'])->name('users.approve');
 Route::post('/users/{id}/reject', [AdminController::class, 'rejectUser'])->name('users.reject');
-Route::post('/users/{id}/approve', [AdminController::class, 'approveUser'])->name('user.approve');
-Route::post('/users/{id}/reject', [AdminController::class, 'rejectUser'])->name('user.reject');
+// Route::post('/users/{id}/approve', [AdminController::class, 'approveUser'])->name('user.approve');
+// Route::post('/users/{id}/reject', [AdminController::class, 'rejectUser'])->name('user.reject');
         // Approval Queue
         Route::get('/approval-queue', [AdminController::class, 'approvalQueue'])->name('approval-queue');
 

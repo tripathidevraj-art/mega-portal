@@ -10,15 +10,21 @@ use App\Models\UserActivityLog;
 use App\Models\AdminActionLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Mail\UserApproved;
+use App\Mail\UserRejected;
+use Illuminate\Support\Facades\Mail;
 
 class AdminController extends Controller
 {
     public function dashboard()
     {
     $stats = [
-        'total_users' => User::where('role', 'user')->count(),
-        'pending_users' => User::where('role', 'user')->where('status', 'pending')->count(),
-        'active_users' => User::where('role', 'user')->where('status', 'verified')->count(), // ✅ FIXED
+        'total_users' => User::where('role', 'user')->whereNotNull('email_verified_at')->count(),
+        'pending_users' => User::where('role', 'user')
+                            ->where('status', 'pending')
+                            ->whereNotNull('email_verified_at')
+                            ->count(),
+        'active_users' => User::where('role', 'user')->where('status', 'verified')->count(),
         'suspended_users' => User::where('role', 'user')->where('status', 'suspended')->count(),
         'pending_jobs' => JobPosting::pending()->count(),
         'pending_offers' => ProductOffer::pending()->count(),
@@ -39,20 +45,26 @@ public function approveUser(Request $request, $id)
 {
     $user = User::where('role', 'user')->findOrFail($id);
 
-    if ($user->status !== 'pending') {
-        return back()->with('error', 'User is not pending approval.');
+    if (!in_array($user->status, ['pending', 'rejected'])) {
+        return back()->with('error', 'User cannot be approved at this time.');
     }
 
     $user->update(['status' => 'verified']);
+
+    // Get optional reason
+    $reason = $request->input('reason');
+
+    // Send email with reason (if any)
+    Mail::to($user->email)->send(new UserApproved($user, $reason));
 
     UserActivityLog::create([
         'user_id' => $user->id,
         'admin_id' => auth()->id(),
         'action_type' => 'activated',
-        'reason' => 'Admin approved user profile',
+        'reason' => $reason ?: 'Admin approved user profile',
     ]);
 
-    return back()->with('success', 'User approved successfully.');
+    return back()->with('success', 'User approved and email sent successfully.');
 }
 
 public function rejectUser(Request $request, $id)
@@ -63,17 +75,24 @@ public function rejectUser(Request $request, $id)
         return back()->with('error', 'User is not pending approval.');
     }
 
+    // Get reason from admin (or use default)
+    $reason = $request->input('reason', 'Your account was not approved by the admin.');
+
     $user->update(['status' => 'rejected']);
+
+    // Send email with reason
+    Mail::to($user->email)->send(new UserRejected($user, $reason));
 
     UserActivityLog::create([
         'user_id' => $user->id,
         'admin_id' => auth()->id(),
-        'action_type' => 'suspended',
-        'reason' => 'Admin rejected user profile',
+        'action_type' => 'rejected',
+        'reason' => $reason,
     ]);
 
-    return back()->with('success', 'User rejected.');
+    return back()->with('success', 'User rejected and email sent.');
 }
+
     public function approvalQueue()
     {
         $pendingJobs = JobPosting::pending()->with('user')->latest()->get();
@@ -177,9 +196,13 @@ public function rejectUser(Request $request, $id)
         return view('admin.admin-logs', compact('logs'));
     }
 
-    public function usersManagement()
-    {
-        $users = User::where('role', 'user')->withCount(['jobPostings', 'productOffers'])->latest()->paginate(20);
-        return view('admin.users-management', compact('users'));
-    }
+public function usersManagement()
+{
+    $users = User::where('role', 'user')
+        ->withCount(['jobPostings', 'productOffers'])
+        ->latest()
+        ->paginate(20);
+
+    return view('admin.users-management', compact('users'));
+}
 }
