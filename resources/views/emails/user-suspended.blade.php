@@ -26,7 +26,7 @@
             
             <p><strong>Reason:</strong> {{ $reason }}</p>
             <p><strong>Suspension Duration:</strong> {{ $durationDays }} days</p>
-            <p><strong>Suspension End Date:</strong> {{ $user->suspended_until->format('F d, Y h:i A') }}</p>
+            <p><strong>Suspension End Date:</strong> {{ $user->suspended_until->format('F d, Y') }}</p>
             
             <p>During the suspension period, you will not be able to:</p>
             <ul>

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class AdminActionLog extends Model
 {
     use HasFactory;
-
+    protected $table = 'admin_actions_logs'; 
     protected $fillable = [
         'admin_id',
         'action',

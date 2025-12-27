@@ -16,48 +16,31 @@ use Illuminate\Support\Facades\Mail;
 
 class UserManagementController extends Controller
 {
-    public function suspendUser(SuspendUserRequest $request, $id)
-    {
-        $user = User::where('role', 'user')->findOrFail($id);
-        
-        DB::transaction(function () use ($user, $request) {
-            $suspendedUntil = now()->addDays($request->duration_days);
-            
-            $user->update([
-                'status' => 'suspended',
-                'suspension_reason' => $request->reason,
-                'suspended_until' => $suspendedUntil,
-            ]);
 
-            // Log user activity
-            UserActivityLog::create([
-                'user_id' => $user->id,
-                'admin_id' => auth()->id(),
-                'action_type' => 'suspended',
-                'reason' => $request->reason,
-                'duration_days' => $request->duration_days,
-            ]);
+// UserManagementController.php
+public function suspendUser(SuspendUserRequest $request, $id)
+{
+    $user = User::where('role', 'user')->findOrFail($id);
+    
+    $suspendedUntil = $request->validated('suspended_until');
+    $reason = $request->validated('reason');
 
-            // Log admin action
-            AdminActionLog::create([
-                'admin_id' => auth()->id(),
-                'action' => 'suspended_user',
-                'target_user_id' => $user->id,
-                'target_type' => 'user',
-                'target_id' => $user->id,
-                'reason' => $request->reason,
-                'metadata' => ['duration_days' => $request->duration_days],
-            ]);
-        });
-
-        // Send email notification
-        Mail::to($user->email)->send(new UserSuspended($user, $request->reason, $request->duration_days));
-
-        return response()->json([
-            'success' => true,
-            'message' => 'User suspended successfully'
+    DB::transaction(function () use ($user, $suspendedUntil, $reason) {
+        $user->update([
+            'status' => 'suspended',
+            'suspension_reason' => $reason,
+            'suspended_until' => $suspendedUntil, // ✅ use directly
         ]);
-    }
+
+        // ... logging code ...
+    });
+
+    // Calculate duration for email (optional)
+    $durationDays = now()->diffInDays($suspendedUntil);
+    Mail::to($user->email)->send(new UserSuspended($user, $reason, $durationDays));
+
+return back()->with('success', 'User suspended and email sent.');
+}
 
     public function activateUser(ActivateUserRequest $request, $id)
     {
@@ -65,7 +48,7 @@ class UserManagementController extends Controller
         
         DB::transaction(function () use ($user, $request) {
             $user->update([
-                'status' => 'active',
+                'status' => 'verified',
                 'suspension_reason' => null,
                 'suspended_until' => null,
             ]);
@@ -91,11 +74,7 @@ class UserManagementController extends Controller
 
         // Send email notification
         Mail::to($user->email)->send(new UserReactivated($user, $request->reason));
-
-        return response()->json([
-            'success' => true,
-            'message' => 'User activated successfully'
-        ]);
+return back()->with('success', 'User activated successfully and email sent.');
     }
 
     public function getUserDetails($id)

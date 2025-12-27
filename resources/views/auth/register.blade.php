@@ -137,7 +137,7 @@
                     <button class="nav-link" id="additional-tab" type="button" role="tab">Additional</button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="account-tab" type="button" role="tab">Security</button>
+                    <button class="nav-link" id="account-tab" type="button" role="tab">Password</button>
                 </li>
             </ul>
 

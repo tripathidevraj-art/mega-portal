@@ -149,27 +149,26 @@ Route::middleware(['auth', 'admin'])
     ->group(function () {
 
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
-// Add these inside Route::middleware(['auth', 'admin'])->group(...)
-Route::post('/users/{id}/approve', [AdminController::class, 'approveUser'])->name('users.approve');
-Route::post('/users/{id}/reject', [AdminController::class, 'rejectUser'])->name('users.reject');
-// Route::post('/users/{id}/approve', [AdminController::class, 'approveUser'])->name('user.approve');
-// Route::post('/users/{id}/reject', [AdminController::class, 'rejectUser'])->name('user.reject');
         // Approval Queue
         Route::get('/approval-queue', [AdminController::class, 'approvalQueue'])->name('approval-queue');
-
+        
         Route::post('/jobs/{id}/approve', [ApprovalController::class, 'approveJob'])->name('jobs.approve');
         Route::post('/jobs/{id}/reject', [ApprovalController::class, 'rejectJob'])->name('jobs.reject');
         Route::post('/offers/{id}/approve', [ApprovalController::class, 'approveOffer'])->name('offers.approve');
         Route::post('/offers/{id}/reject', [ApprovalController::class, 'rejectOffer'])->name('offers.reject');
-
+        
         // Expired Content
         Route::get('/expired-content', [AdminController::class, 'expiredContent'])->name('expired-content');
-
+        
         // User Management
         Route::get('/users', [AdminController::class, 'usersManagement'])->name('users-management');
         Route::get('/users/{id}/details', [UserManagementController::class, 'getUserDetails'])->name('user.details');
         Route::post('/users/{id}/suspend', [UserManagementController::class, 'suspendUser'])->name('user.suspend');
         Route::post('/users/{id}/activate', [UserManagementController::class, 'activateUser'])->name('user.activate');
+        Route::post('/users/{id}/approve', [AdminController::class, 'approveUser'])->name('users.approve');
+        Route::post('/users/{id}/reject', [AdminController::class, 'rejectUser'])->name('users.reject');
+        // Route::post('/users/{id}/approve', [AdminController::class, 'approveUser'])->name('user.approve');
+        // Route::post('/users/{id}/reject', [AdminController::class, 'rejectUser'])->name('user.reject');
 
         // Logs
         Route::get('/user-logs', [AdminController::class, 'userLogs'])->name('user-logs');

@@ -196,13 +196,68 @@ public function rejectUser(Request $request, $id)
         return view('admin.admin-logs', compact('logs'));
     }
 
-public function usersManagement()
+public function usersManagement(Request $request)
 {
-    $users = User::where('role', 'user')
-        ->withCount(['jobPostings', 'productOffers'])
-        ->latest()
-        ->paginate(20);
+    $query = User::where('role', 'user');
 
-    return view('admin.users-management', compact('users'));
+    // ===== SEARCH =====
+    if ($request->filled('search')) {
+        $search = $request->search;
+        $query->where(function ($q) use ($search) {
+            $q->where('full_name', 'like', "%{$search}%")
+              ->orWhere('email', 'like', "%{$search}%")
+              ->orWhere('designation', 'like', "%{$search}%");
+        });
+    }
+
+    // ===== FILTERS =====
+    if ($request->filled('status')) {
+        $query->where('status', $request->status);
+    }
+
+    if ($request->filled('email_verified')) {
+        if ($request->email_verified === 'verified') {
+            $query->whereNotNull('email_verified_at');
+        } elseif ($request->email_verified === 'unverified') {
+            $query->whereNull('email_verified_at');
+        }
+    }
+
+    if ($request->filled('from_date')) {
+        $query->whereDate('created_at', '>=', $request->from_date);
+    }
+
+    if ($request->filled('to_date')) {
+        $query->whereDate('created_at', '<=', $request->to_date);
+    }
+
+    // ===== SORTING =====
+    $sortField = $request->get('sort', 'created_at');
+    $sortOrder = $request->get('order', 'desc');
+
+    // Only allow safe columns to avoid SQL injection
+    $allowedSorts = ['full_name', 'email', 'status', 'created_at'];
+    if (!in_array($sortField, $allowedSorts)) {
+        $sortField = 'created_at';
+    }
+
+    $query->orderBy($sortField, $sortOrder);
+
+    // ===== STATS (filtered-aware or total — here we keep total for dashboard clarity) =====
+    $stats = [
+        'verified' => User::where('role', 'user')->where('status', 'verified')->count(),
+        'pending_verified' => User::where('role', 'user')->where('status', 'pending')->whereNotNull('email_verified_at')->count(),
+        'unverified' => User::where('role', 'user')->where('status', 'pending')->whereNull('email_verified_at')->count(),
+        'rejected' => User::where('role', 'user')->where('status', 'rejected')->count(),
+        'suspended' => User::where('role', 'user')->where('status', 'suspended')->count(),
+    ];
+
+    // ===== PAGINATION =====
+    $users = $query->withCount(['jobPostings', 'productOffers'])
+                   ->latest()
+                   ->paginate(10)
+                   ->appends($request->except('page')); // Preserve filters/sort in pagination links
+
+    return view('admin.users-management', compact('users', 'stats', 'request'));
 }
 }
