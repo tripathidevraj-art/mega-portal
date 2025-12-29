@@ -63,6 +63,8 @@
                                     <li><a class="dropdown-item" href="{{ route('admin.users-management') }}">Users Management</a></li>
                                     <li><a class="dropdown-item" href="{{ route('admin.user-logs') }}">User Logs</a></li>
                                     <li><a class="dropdown-item" href="{{ route('admin.user-analytics') }}">Analytics</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="{{ route('admin.profile') }}">My Profile</a></li>
                                 </ul>
                             </li>
 

@@ -347,7 +347,7 @@
                                                     <i class="fas fa-user-check"></i> Activate
                                                 </button>
                                             @endif
-                                            <a href="{{ route('admin.user.details', $user->id) }}" class="btn btn-info btn-sm mt-1">
+                                            <a href="{{ route('admin.user.show', $user->id) }}" class="btn btn-info btn-sm mt-1">
                                                 <i class="fas fa-eye"></i> View
                                             </a>
                                         @endif

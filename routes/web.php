@@ -16,6 +16,7 @@ use App\Http\Controllers\User\ProfileController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\ApprovalController;
 use App\Http\Controllers\Admin\UserManagementController;
+use App\Http\Controllers\Admin\AdminProfileController;
 
 // Super Admin Controllers
 use App\Http\Controllers\SuperAdmin\AdminManagementController;
@@ -167,15 +168,22 @@ Route::middleware(['auth', 'admin'])
         Route::post('/users/{id}/activate', [UserManagementController::class, 'activateUser'])->name('user.activate');
         Route::post('/users/{id}/approve', [AdminController::class, 'approveUser'])->name('users.approve');
         Route::post('/users/{id}/reject', [AdminController::class, 'rejectUser'])->name('users.reject');
+        Route::post('/users/{id}/update-section/{section}', [UserManagementController::class, 'updateSection'])->name('user.update.section');
+        Route::get('/users/{id}', [UserManagementController::class, 'showUserDetails'])->name('user.show');
+        // Route::get('/users/{id}/edit', [UserManagementController::class, 'showUserForm'])->name('user.edit');
+        // Route::put('/users/{id}', [UserManagementController::class, 'updateUser'])->name('user.update');
         // Route::post('/users/{id}/approve', [AdminController::class, 'approveUser'])->name('user.approve');
         // Route::post('/users/{id}/reject', [AdminController::class, 'rejectUser'])->name('user.reject');
-
         // Logs
         Route::get('/user-logs', [AdminController::class, 'userLogs'])->name('user-logs');
         Route::get('/admin-logs', [AdminController::class, 'adminLogs'])->name('admin-logs');
 
         // Analytics
         Route::get('/user-analytics', [AdminController::class, 'userAnalytics'])->name('user-analytics');
+
+        // Admin profile routes
+        Route::get('/profile', [AdminProfileController::class, 'show'])->name('profile');
+        Route::post('/profile', [AdminProfileController::class, 'update'])->name('profile.update');
     });
 
 /*
