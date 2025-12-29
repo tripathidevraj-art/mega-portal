@@ -191,51 +191,128 @@
     </div>
 </div>
 
-<!-- Recent Activity -->
+<!-- Recent Activities Tabs -->
 <div class="row">
     <div class="col-12">
         <div class="card shadow">
-            <div class="card-header bg-dark text-white">
-                <h6 class="m-0 font-weight-bold">Recent User Activities</h6>
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold">Recent Activities</h6>
+                <ul class="nav nav-pills card-header-pills">
+                    <li class="nav-item">
+                        <a class="nav-link active" data-bs-toggle="tab" href="#users-tab">Users</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#admins-tab">Admins</a>
+                    </li>
+                </ul>
             </div>
             <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>User</th>
-                                <th>Action</th>
-                                <th>Reason</th>
-                                <th>Admin</th>
-                                <th>Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($recentActivities as $activity)
-                                <tr>
-                                    <td>
-                                        <strong>{{ $activity->user->full_name ?? 'Deleted User' }}</strong><br>
-                                        <small class="text-muted">{{ $activity->user->email ?? '' }}</small>
-                                    </td>
-                                    <td>
-                                        <span class="badge {{ $activity->action_badge_class }}">
-                                            {{ str_replace('_', ' ', ucfirst($activity->action_type)) }}
-                                        </span>
-                                        @if($activity->duration_days)
-                                            <br><small>{{ $activity->duration_days }} days</small>
-                                        @endif
-                                    </td>
-                                    <td>{{ Str::limit($activity->reason, 50) }}</td>
-                                    <td>{{ $activity->admin->full_name ?? 'System' }}</td>
-                                    <td>{{ $activity->created_at->format('M d, Y H:i') }}</td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="5" class="text-center">No recent activities</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+                <div class="tab-content">
+                    <!-- Users Tab -->
+                    <div class="tab-pane fade show active" id="users-tab">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Action</th>
+                                        <th>Reason</th>
+                                        <th>By Admin</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($userActivities as $activity)
+                                        <tr>
+                                            <td>
+                                                @if($activity->user)
+                                                    <strong>{{ $activity->user->full_name }}</strong><br>
+                                                    <small class="text-muted">{{ $activity->user->email }}</small>
+                                                @else
+                                                    <em>Deleted User</em>
+                                                @endif
+                                            </td>
+<td>
+    <span class="badge {{ $activity->actionBadgeClass }}">
+        {{ ucfirst(str_replace('_', ' ', $activity->action_type)) }}
+    </span>
+    @if($activity->duration_days)
+        <br><small class="text-muted">{{ $activity->duration_days }} days</small>
+    @endif
+</td>
+                                            <td>{{ Str::limit($activity->reason ?? 'No reason', 40) }}</td>
+                                            <td>
+                                                @if($activity->admin)
+                                                    {{ $activity->admin->full_name }}
+                                                @else
+                                                    <em>System</em>
+                                                @endif
+                                            </td>
+                                            <td title="{{ $activity->created_at->format('M d, Y h:i A') }}">
+                                                {{ $activity->created_at->diffForHumans() }}
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="5" class="text-center text-muted">No user activities yet</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Admins Tab -->
+                    <div class="tab-pane fade" id="admins-tab">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Target User</th>
+                                        <th>Action</th>
+                                        <th>Reason</th>
+                                        <th>Admin</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($adminActions as $action)
+                                        <tr>
+                                            <td>
+                                                @if($action->targetUser)
+                                                    <strong>{{ $action->targetUser->full_name }}</strong><br>
+                                                    <small class="text-muted">{{ $action->targetUser->email }}</small>
+                                                @else
+                                                    <em>Unknown User</em>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                <span class="badge {{ $action->actionBadgeClass }}">
+                                                    {{ ucfirst(str_replace('_', ' ', $action->action)) }}
+                                                </span>
+                                            </td>
+                                            <td>{{ Str::limit($action->reason ?? '—', 40) }}</td>
+                                            <td>
+                                                @if($action->admin)
+                                                    {{ $action->admin->full_name }}
+                                                    <br><small class="text-muted">{{ $action->admin->email }}</small>
+                                                @else
+                                                    <em>Unknown Admin</em>
+                                                @endif
+                                            </td>
+                                            <td title="{{ $action->created_at->format('M d, Y h:i A') }}">
+                                                {{ $action->created_at->diffForHumans() }}
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="5" class="text-center text-muted">No admin actions yet</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
