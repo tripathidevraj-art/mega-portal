@@ -70,7 +70,7 @@ class JobPosting extends Model
     }
     public function applications()
     {
-        return $this->hasMany(JobApplication::class);
+        return $this->hasMany(JobApplication::class, 'job_posting_id');
     }
 
     public function hasUserApplied($userId = null)

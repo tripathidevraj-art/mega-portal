@@ -12,52 +12,81 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class JobApplicationController extends Controller
 {
-    public function apply(StoreJobApplicationRequest $request, $jobId)
-    {
-        $job = JobPosting::active()->findOrFail($jobId);
-        
-        // Check if user already applied
-        if ($job->hasUserApplied()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'You have already applied for this job.'
-            ], 400);
-        }
-        
-        // Check if user is applying to their own job
-        if ($job->user_id === Auth::id()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'You cannot apply to your own job posting.'
-            ], 400);
-        }
-        
-        $data = $request->validated();
-        $data['job_posting_id'] = $job->id;
-        $data['user_id'] = Auth::id();
-        
-        // Handle resume upload
-        if ($request->hasFile('resume')) {
-            $path = $request->file('resume')->store('resumes', 'public');
-            $data['resume'] = $path;
-        }
-        
-        $application = JobApplication::create($data);
-        
-        // Send email to job poster
-        Mail::to($job->user->email)->send(new JobApplicationReceived($application));
-        
-        // Send confirmation email to applicant
-        Mail::to(Auth::user()->email)->send(new JobApplicationConfirmation($application));
-        
-        return response()->json([
-            'success' => true,
-            'message' => 'Application submitted successfully! Emails have been sent.'
-        ]);
+// JobApplicationController.php
+
+public function apply(Request $request, $jobId)
+{
+    $request->validate([
+        'cover_letter' => 'required|string|min:50',
+        'resume' => [
+            'nullable',
+            'file',
+            'max:2048',
+            'mimes:pdf,doc,docx',
+            'mimetypes:application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        ],
+    ]);
+
+    $job = JobPosting::where('status', 'approved')->findOrFail($jobId);
+    
+    if ($job->user_id === auth()->id()) {
+        return back()->with('error', 'You cannot apply to your own job.');
     }
+
+    if ($job->applications()->where('user_id', auth()->id())->exists()) {
+        return back()->with('error', 'You have already applied.');
+    }
+
+    // ✅ Sanitize cover letter
+    $coverLetter = strip_tags($request->cover_letter);
+    $coverLetter = trim(preg_replace('/\s+/', ' ', $coverLetter));
+
+    $data = [
+        'job_posting_id' => $job->id,
+        'user_id' => auth()->id(),
+        'cover_letter' => $coverLetter,
+        'status' => 'pending'
+    ];
+
+    // ✅ Secure file handling
+    if ($request->hasFile('resume')) {
+        $path = $request->file('resume')->store('resumes', 'public');
+        $data['resume'] = $path;
+    }
+
+// After creating application
+$application = JobApplication::create($data);
+
+// Load relations (optional but safe)
+$application->load('user', 'job.user');
+
+// In controller
+try {
+    if ($application->user?->email) {
+        Mail::to($application->user->email)
+            ->send(new JobApplicationConfirmation($application));
+    }
+} catch (\Exception $e) {
+    // Log error but don't stop execution
+    \Log::error('Email failed: ' . $e->getMessage());
+}
+
+try {
+    if ($application->job?->user?->email) {
+        Mail::to($application->job->user->email)
+            ->send(new JobApplicationReceived($application));
+    }
+} catch (\Exception $e) {
+    \Log::error('Email failed: ' . $e->getMessage());
+}
+
+return redirect()->route('jobs.show', $job->id)
+                 ->with('success', 'Application submitted securely!');
+}
     
     public function myApplications()
     {
@@ -104,4 +133,23 @@ class JobApplicationController extends Controller
             'message' => 'Application status updated successfully.'
         ]);
     }
+    public function showApplyForm($id)
+{
+    $job = JobPosting::where('id', $id)
+                    ->where('status', 'approved')
+                    ->firstOrFail();
+
+    // Apply करने की check (optional)
+    if ($job->user_id === auth()->id()) {
+        return redirect()->route('jobs.show', $job->id)
+                         ->with('error', 'You cannot apply to your own job.');
+    }
+
+    if ($job->hasUserApplied()) {
+        return redirect()->route('jobs.show', $job->id)
+                         ->with('error', 'You have already applied for this job.');
+    }
+
+    return view('user.jobs.apply', compact('job'));
+}
 }

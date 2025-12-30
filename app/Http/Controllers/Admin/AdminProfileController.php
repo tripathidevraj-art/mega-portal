@@ -10,18 +10,18 @@ use Illuminate\Support\Facades\Storage;
 
 class AdminProfileController extends Controller
 {
-public function show()
-{
-    $user = Auth::user();
-    
-    $activityLogs = AdminActionLog::where('admin_id', $user->id)
-        ->with(['targetUser', 'admin']) // ← Load both relations
-        ->latest()
-        ->take(5)
-        ->get();
+    public function show()
+    {
+        $user = Auth::user();
+        
+        $activityLogs = AdminActionLog::where('admin_id', $user->id)
+            ->with(['targetUser', 'admin']) // ← Load both relations
+            ->latest()
+            ->take(5)
+            ->get();
 
-    return view('admin.profile.show', compact('user', 'activityLogs'));
-}
+        return view('admin.profile.show', compact('user', 'activityLogs'));
+    }
 
     public function update(Request $request)
     {

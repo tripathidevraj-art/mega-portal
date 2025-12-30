@@ -55,9 +55,11 @@
                         You cannot apply to your own job posting.
                     </div>
                 @else
-                    <button class="btn btn-primary btn-lg w-100" data-bs-toggle="modal" data-bs-target="#applyModal">
-                        <i class="fas fa-paper-plane me-2"></i>Apply Now
-                    </button>
+                <a href="{{ route('jobs.apply.form', $job->id) }}" 
+                target="_blank" 
+                class="btn btn-primary btn-lg w-100">
+                    <i class="fas fa-paper-plane me-2"></i>Apply Now
+                </a>
                 @endif
             @else
                 <div class="alert alert-warning">
@@ -75,49 +77,7 @@
     </div>
 </div>
 
-<!-- Apply Modal -->
-<div class="modal fade" id="applyModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Apply for: {{ $job->job_title }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <form id="applyForm" action="{{ route('jobs.apply', $job->id) }}" method="POST" enctype="multipart/form-data">
-                @csrf
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Cover Letter *</label>
-                        <textarea class="form-control" name="cover_letter" rows="6" 
-                                  placeholder="Tell us why you're the right candidate for this position..." 
-                                  required></textarea>
-                        <div class="form-text">Minimum 50 characters</div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Resume (Optional)</label>
-                        <input type="file" class="form-control" name="resume" 
-                               accept=".pdf,.doc,.docx">
-                        <div class="form-text">Accepted formats: PDF, DOC, DOCX (Max: 2MB)</div>
-                    </div>
-                    
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle me-2"></i>
-                        Your application will be sent to {{ $job->user->full_name }}. 
-                        You'll receive a confirmation email after submission.
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">
-                        <span id="applyText">Submit Application</span>
-                        <span id="applySpinner" class="spinner-border spinner-border-sm d-none"></span>
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+
                 <div class="border-top pt-3">
                     <h6 class="mb-3">Posted By</h6>
                     <div class="d-flex align-items-center">
@@ -190,41 +150,6 @@ function copyJobLink(jobId) {
         alert('Link copied to clipboard!');
     });
 }
-
-// Add to scripts section
-$('#applyForm').submit(function(e) {
-    e.preventDefault();
-    
-    var btn = $('#applyForm button[type="submit"]');
-    var applyText = $('#applyText');
-    var spinner = $('#applySpinner');
-    
-    btn.prop('disabled', true);
-    applyText.text('Submitting...');
-    spinner.removeClass('d-none');
-    
-    var formData = new FormData(this);
-    
-    $.ajax({
-        url: $(this).attr('action'),
-        method: 'POST',
-        data: formData,
-        processData: false,
-        contentType: false,
-        success: function(response) {
-            showToast('success', response.message);
-            $('#applyModal').modal('hide');
-            setTimeout(() => location.reload(), 2000);
-        },
-        error: function(xhr) {
-            btn.prop('disabled', false);
-            applyText.text('Submit Application');
-            spinner.addClass('d-none');
-            
-            showToast('error', xhr.responseJSON?.message || 'An error occurred');
-        }
-    });
-});
 </script>
 @endpush
 @endsection

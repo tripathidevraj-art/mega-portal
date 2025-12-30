@@ -137,6 +137,11 @@ Route::middleware('auth')->group(function () {
         Route::post('/store', [OfferController::class, 'store'])->name('store');
         Route::get('/{id}/share', [OfferController::class, 'share'])->name('share');
     });
+    
+    Route::get('/jobs/{id}/apply', [JobApplicationController::class, 'showApplyForm'])
+       ->name('jobs.apply.form');
+    Route::post('/jobs/{id}/apply', [JobApplicationController::class, 'apply'])
+       ->name('jobs.apply');
 });
 
 /*
