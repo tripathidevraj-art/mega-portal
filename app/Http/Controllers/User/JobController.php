@@ -31,6 +31,7 @@ class JobController extends Controller
     {
         $jobs = JobPosting::where('user_id', Auth::id())
             ->with('approvedBy')
+            ->withCount('applications') 
             ->latest()
             ->paginate(10);
             

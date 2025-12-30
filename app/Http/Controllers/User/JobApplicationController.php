@@ -123,33 +123,57 @@ return redirect()->route('jobs.show', $job->id)
             ], 403);
         }
         
+        $oldStatus = $application->status;
         $application->update([
             'status' => $request->status,
             'admin_notes' => $request->admin_notes,
         ]);
+
+        // ✅ SEND EMAIL TO APPLICANT ON STATUS CHANGE
+        try {
+            if ($application->user?->email) {
+                $mail = null;
+                
+                switch ($request->status) {
+                    case 'reviewed':
+                        $mail = new \App\Mail\ApplicationReviewed($application);
+                        break;
+                    case 'shortlisted':
+                        $mail = new \App\Mail\ApplicationShortlisted($application);
+                        break;
+                    case 'rejected':
+                        $mail = new \App\Mail\ApplicationRejected($application);
+                        break;
+                }
+
+                if ($mail) {
+                    \Mail::to($application->user->email)->send($mail);
+                }
+            }
+        } catch (\Exception $e) {
+            \Log::error('Status update email failed: ' . $e->getMessage());
+        }
         
-        return response()->json([
-            'success' => true,
-            'message' => 'Application status updated successfully.'
-        ]);
+        return back()->with('success', 'Application status updated successfully.');
     }
+
     public function showApplyForm($id)
-{
-    $job = JobPosting::where('id', $id)
-                    ->where('status', 'approved')
-                    ->firstOrFail();
+    {
+        $job = JobPosting::where('id', $id)
+                        ->where('status', 'approved')
+                        ->firstOrFail();
 
-    // Apply करने की check (optional)
-    if ($job->user_id === auth()->id()) {
-        return redirect()->route('jobs.show', $job->id)
-                         ->with('error', 'You cannot apply to your own job.');
+        // Apply करने की check (optional)
+        if ($job->user_id === auth()->id()) {
+            return redirect()->route('jobs.show', $job->id)
+                            ->with('error', 'You cannot apply to your own job.');
+        }
+
+        if ($job->hasUserApplied()) {
+            return redirect()->route('jobs.show', $job->id)
+                            ->with('error', 'You have already applied for this job.');
+        }
+
+        return view('user.jobs.apply', compact('job'));
     }
-
-    if ($job->hasUserApplied()) {
-        return redirect()->route('jobs.show', $job->id)
-                         ->with('error', 'You have already applied for this job.');
-    }
-
-    return view('user.jobs.apply', compact('job'));
-}
 }

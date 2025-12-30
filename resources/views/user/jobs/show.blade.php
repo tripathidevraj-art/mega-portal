@@ -1,155 +1,271 @@
 @extends('layouts.app')
 
 @section('title', $job->job_title)
-
 @section('header', $job->job_title)
+@section('subheader', 'View detailed job information and apply')
+
+@push('styles')
+<style>
+    .job-header {
+        border-bottom: 1px solid #e9ecef;
+        padding-bottom: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .job-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin: 1rem 0;
+    }
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.95rem;
+    }
+    .apply-section {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-top: 2rem;
+    }
+    .profile-preview {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #e9ecef;
+    }
+    .share-btn {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        transition: transform 0.2s;
+    }
+    .share-btn:hover {
+        transform: translateY(-2px);
+    }
+    .quick-actions .btn {
+        padding: 0.6rem 1rem;
+        font-weight: 500;
+    }
+    .badge-job-type {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.875rem;
+        border-radius: 50px;
+    }
+    @media (max-width: 768px) {
+        .job-header .d-flex {
+            flex-direction: column;
+            align-items: flex-start !important;
+        }
+        .job-header .text-end {
+            margin-top: 1rem;
+        }
+    }
+</style>
+@endpush
 
 @section('content')
-<div class="row">
-    <div class="col-md-8">
-        <div class="card shadow mb-4">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-start mb-4">
-                    <div>
-                        <h2 class="mb-1">{{ $job->job_title }}</h2>
-                        <p class="text-muted mb-0">
-                            <i class="fas fa-building me-1"></i>{{ $job->industry }}
-                        </p>
+<div class="row g-4">
+    <!-- Main Content -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+                <!-- Job Header -->
+                <div class="job-header">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h1 class="h2 mb-1">{{ $job->job_title }}</h1>
+                            <p class="text-muted mb-0">
+                                <i class="fas fa-building me-1"></i> {{ $job->industry }}
+                            </p>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge badge-job-type bg-{{ $job->job_type == 'full_time' ? 'primary' : ($job->job_type == 'part_time' ? 'success' : 'info') }}">
+                                {{ str_replace('_', ' ', ucfirst($job->job_type)) }}
+                            </span>
+                            <p class="text-success fw-bold mb-0 mt-2">{{ $job->salary_range }}</p>
+                        </div>
                     </div>
-                    <div class="text-end">
-                        <span class="badge bg-{{ $job->job_type == 'full_time' ? 'primary' : ($job->job_type == 'part_time' ? 'success' : 'info') }} fs-6">
-                            {{ str_replace('_', ' ', ucfirst($job->job_type)) }}
-                        </span>
-                        <p class="text-success fw-bold mt-2 mb-0">{{ $job->salary_range }}</p>
+
+                    <div class="job-meta mt-3">
+                        <div class="meta-item">
+                            <i class="fas fa-map-marker-alt text-primary"></i>
+                            <span>{{ $job->work_location }}</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-calendar-check text-warning"></i>
+                            <span>Deadline: {{ $job->app_deadline->format('F d, Y') }}</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-clock text-info"></i>
+                            <span>Posted {{ $job->created_at->diffForHumans() }}</span>
+                        </div>
                     </div>
                 </div>
-                
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        <p><i class="fas fa-map-marker-alt me-2"></i> <strong>Location:</strong> {{ $job->work_location }}</p>
-                    </div>
-                    <div class="col-md-6">
-                        <p><i class="fas fa-calendar-alt me-2"></i> <strong>Deadline:</strong> {{ $job->app_deadline->format('F d, Y') }}</p>
-                    </div>
-                </div>
-                
+
+                <!-- Job Description -->
                 <div class="mb-4">
-                    <h5 class="border-bottom pb-2">Job Description</h5>
-                    <p class="mb-0">{{ $job->job_description }}</p>
-                </div>
-                <!-- Add this after the job description section -->
-<div class="card shadow mb-4">
-    <div class="card-body">
-        <h5 class="card-title mb-3">Apply for this Position</h5>
-        
-        @auth
-            @if(auth()->user()->isActive())
-                @if($job->hasUserApplied())
-                    <div class="alert alert-info">
-                        <i class="fas fa-check-circle me-2"></i>
-                        You have already applied for this job.
+                    <h5 class="mb-3 pb-2 border-bottom">Job Description</h5>
+                    <div class="text-justify">
+                        {!! nl2br(e($job->job_description)) !!}
                     </div>
-                @elseif($job->user_id === auth()->id())
-                    <div class="alert alert-warning">
-                        <i class="fas fa-info-circle me-2"></i>
-                        You cannot apply to your own job posting.
-                    </div>
-                @else
-                <a href="{{ route('jobs.apply.form', $job->id) }}" 
-                target="_blank" 
-                class="btn btn-primary btn-lg w-100">
-                    <i class="fas fa-paper-plane me-2"></i>Apply Now
-                </a>
-                @endif
-            @else
-                <div class="alert alert-warning">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
-                    Your account needs to be active to apply for jobs.
                 </div>
-            @endif
-        @else
-            <div class="alert alert-warning">
-                <i class="fas fa-sign-in-alt me-2"></i>
-                Please <a href="{{ route('login') }}">login</a> or 
-                <a href="{{ route('register') }}">register</a> to apply for this job.
-            </div>
-        @endauth
-    </div>
-</div>
 
+                <!-- Apply Section -->
+                <div class="apply-section">
+                    <h5 class="mb-3">Apply for this Position</h5>
+                    
+                    @auth
+                        @if(auth()->user()->isActive())
+                            @if($job->hasUserApplied())
+                                <div class="alert alert-success d-flex align-items-center">
+                                    <i class="fas fa-check-circle me-2 fs-4"></i>
+                                    <div>You have already applied for this job.</div>
+                                </div>
+                            @elseif($job->user_id === auth()->id())
+                                <div class="alert alert-warning d-flex align-items-center">
+                                    <i class="fas fa-info-circle me-2 fs-4"></i>
+                                    <div>You cannot apply to your own job posting.</div>
+                                </div>
+                            @else
+                                <a href="{{ route('jobs.apply.form', $job->id) }}" 
+                                   class="btn btn-success btn-lg w-100 d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-paper-plane me-2"></i> Apply Now
+                                </a>
+                            @endif
+                        @else
+                            <div class="alert alert-warning d-flex align-items-center">
+                                <i class="fas fa-exclamation-triangle me-2 fs-4"></i>
+                                <div>Your account needs to be active to apply for jobs.</div>
+                            </div>
+                        @endif
+                    @else
+                        <div class="alert alert-light border d-flex align-items-center">
+                            <i class="fas fa-sign-in-alt me-2 text-primary fs-4"></i>
+                            <div>
+                                Please <a href="{{ route('login') }}" class="text-decoration-underline">login</a> or 
+                                <a href="{{ route('register') }}" class="text-decoration-underline">register</a> to apply.
+                            </div>
+                        </div>
+                    @endauth
+                </div>
 
-                <div class="border-top pt-3">
+                <!-- Posted By -->
+                <div class="pt-3 mt-4 border-top">
                     <h6 class="mb-3">Posted By</h6>
                     <div class="d-flex align-items-center">
-                        <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-3" 
-                             style="width: 50px; height: 50px;">
-                            <i class="fas fa-user text-secondary"></i>
-                        </div>
-                        <div>
+                        @if($job->user->profile_image)
+                            <img src="{{ asset('storage/' . $job->user->profile_image) }}" 
+                                 alt="{{ $job->user->full_name }}" 
+                                 class="profile-preview">
+                        @else
+                            <div class="profile-preview bg-light d-flex align-items-center justify-content-center">
+                                <i class="fas fa-user text-secondary"></i>
+                            </div>
+                        @endif
+                        <div class="ms-3">
                             <p class="mb-0 fw-bold">{{ $job->user->full_name }}</p>
-                            <p class="mb-0 text-muted">Member since {{ $job->user->created_at->format('M Y') }}</p>
+                            <p class="mb-0 text-muted small">Member since {{ $job->user->created_at->format('M Y') }}</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    
-    <div class="col-md-4">
-        <div class="card shadow mb-4">
-            <div class="card-body">
-                <h5 class="card-title mb-3">Share This Job</h5>
-                <div class="share-buttons text-center">
-                    <button onclick="shareJob({{ $job->id }})" class="btn btn-success rounded-circle m-1" style="width: 50px; height: 50px;">
+
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+        <!-- Share Card -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body p-4">
+                <h5 class="card-title mb-4">Share This Job</h5>
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="https://wa.me/?text={{ urlencode('Check out this job: ' . $job->job_title . ' - ' . route('jobs.show', $job->id)) }}" 
+                       target="_blank" 
+                       class="share-btn btn btn-success"
+                       title="Share on WhatsApp">
                         <i class="fab fa-whatsapp"></i>
-                    </button>
-                    <button onclick="shareJob({{ $job->id }})" class="btn btn-primary rounded-circle m-1" style="width: 50px; height: 50px;">
+                    </a>
+                    <a href="mailto:?subject=Job Opportunity&body={{ urlencode('Check out this job: ' . $job->job_title . ' - ' . route('jobs.show', $job->id)) }}" 
+                       class="share-btn btn btn-primary"
+                       title="Share via Email">
                         <i class="fas fa-envelope"></i>
-                    </button>
-                    <button onclick="copyJobLink({{ $job->id }})" class="btn btn-info rounded-circle m-1" style="width: 50px; height: 50px;">
+                    </a>
+                    <button onclick="copyJobLink()" class="share-btn btn btn-info" title="Copy Link">
                         <i class="fas fa-link"></i>
                     </button>
                 </div>
             </div>
         </div>
-        
-        <div class="card shadow">
-            <div class="card-body">
-                <h5 class="card-title mb-3">Quick Actions</h5>
-                <a href="{{ route('user.jobs.create') }}" class="btn btn-primary w-100 mb-2">
-                    <i class="fas fa-plus me-2"></i>Post a Job
-                </a>
-                <a href="{{ route('user.jobs.my-jobs') }}" class="btn btn-outline-secondary w-100 mb-2">
-                    <i class="fas fa-list me-2"></i>My Jobs
-                </a>
-                <a href="{{ route('jobs.index') }}" class="btn btn-outline-secondary w-100">
-                    <i class="fas fa-briefcase me-2"></i>Browse All Jobs
-                </a>
+
+        <!-- Quick Actions -->
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+                <h5 class="card-title mb-4">Quick Actions</h5>
+                <div class="d-grid gap-2">
+                    <a href="{{ route('user.jobs.create') }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i> Post a Job
+                    </a>
+                    <a href="{{ route('user.jobs.my-jobs') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-list me-2"></i> My Jobs
+                    </a>
+                    <a href="{{ route('jobs.index') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-briefcase me-2"></i> Browse All Jobs
+                    </a>
+                </div>
             </div>
         </div>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+                <h5 class="card-title mb-4">Ignore This !</h5>
+                <p>Suggestions from my side
+                <ul class="d-grid gap-2">
+                    <li>1. "Save Job" / Bookmark Feature</li>
+                    <li> 2. Real-time Application Counter</li>
+                    <li>3. "Similar Jobs" Section (On Sidebar)</li>
+                    <li>4. "Report Job" Button (Trust & Safety)</li>
+                </ul>
+            </div>
+        </div>
+        <!-- Expiry Warning -->
+        @if($job->app_deadline->lt(now()->addDays(3)))
+            <div class="alert alert-warning mt-4 d-flex align-items-center">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <small>Deadline is in {{ $job->app_deadline->diffForHumans() }}</small>
+            </div>
+        @endif
     </div>
 </div>
+@endsection
 
 @push('scripts')
 <script>
-function shareJob(jobId) {
-    $.ajax({
-        url: '/user/jobs/' + jobId + '/share',
-        method: 'GET',
-        success: function(response) {
-            if (response.success) {
-                window.open(response.links.whatsapp, '_blank');
-            }
-        }
-    });
-}
-
-function copyJobLink(jobId) {
-    var link = window.location.origin + '/jobs/' + jobId;
-    navigator.clipboard.writeText(link).then(function() {
-        alert('Link copied to clipboard!');
+function copyJobLink() {
+    const link = window.location.href;
+    navigator.clipboard.writeText(link).then(() => {
+        // Show toast
+        const toast = document.createElement('div');
+        toast.className = 'toast align-items-center text-white bg-success border-0';
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">Link copied to clipboard!</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        `;
+        document.body.appendChild(toast);
+        const bsToast = new bootstrap.Toast(toast, { delay: 2000 });
+        bsToast.show();
+        toast.addEventListener('hidden.bs.toast', () => toast.remove());
+    }).catch(err => {
+        console.error('Failed to copy: ', err);
     });
 }
 </script>
 @endpush
-@endsection
