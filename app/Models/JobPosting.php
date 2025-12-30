@@ -53,10 +53,14 @@ class JobPosting extends Model
     public function scopeExpired($query)
     {
         return $query->where('status', 'expired')
-                    ->orWhere(function($q) {
-                        $q->where('status', 'approved')
-                          ->where('app_deadline', '<', now()->toDateString());
-                    });
+            ->orWhere(function($q) {
+                $q->where('status', 'approved')
+                ->where('app_deadline', '<', now()->toDateString());
+            })
+            ->orWhere(function($q) {
+                $q->where('status', 'pending')
+                ->where('app_deadline', '<', now()->toDateString());
+            });
     }
 
     public function getIsExpiredAttribute()

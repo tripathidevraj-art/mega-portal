@@ -37,7 +37,7 @@ class CheckExpiredContent extends Command
             DB::beginTransaction();
             
             // Mark expired jobs
-            $expiredJobsCount = JobPosting::where('status', 'approved')
+            $expiredJobsCount = JobPosting::whereIn('status', ['approved', 'pending'])
                 ->where('app_deadline', '<', now()->toDateString())
                 ->update(['status' => 'expired']);
             
@@ -45,7 +45,7 @@ class CheckExpiredContent extends Command
             Log::info("Marked {$expiredJobsCount} jobs as expired.");
             
             // Mark expired offers
-            $expiredOffersCount = ProductOffer::where('status', 'approved')
+            $expiredOffersCount = ProductOffer::whereIn('status', ['approved', 'pending'])
                 ->where('expiry_date', '<', now()->toDateString())
                 ->update(['status' => 'expired']);
             

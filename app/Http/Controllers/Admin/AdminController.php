@@ -101,10 +101,68 @@ class AdminController extends Controller
         return back()->with('success', 'User rejected and email sent.');
     }
 
-    public function approvalQueue()
+    public function approvalQueue(Request $request)
     {
-        $pendingJobs = JobPosting::pending()->with('user')->latest()->get();
-        $pendingOffers = ProductOffer::pending()->with('user')->latest()->get();
+        $queryJobs = JobPosting::where('status', 'pending')
+            ->where('app_deadline', '>=', now()->toDateString());
+
+        // Apply filters for jobs
+        if ($request->filled('job_search')) {
+            $queryJobs->where(function($q) use ($request) {
+                $q->where('job_title', 'like', '%' . $request->job_search . '%')
+                ->orWhere('industry', 'like', '%' . $request->job_search . '%');
+            });
+        }
+        if ($request->filled('job_type')) {
+            $queryJobs->where('job_type', $request->job_type);
+        }
+        if ($request->filled('job_deadline_from')) {
+            $queryJobs->where('app_deadline', '>=', $request->job_deadline_from);
+        }
+        if ($request->filled('job_deadline_to')) {
+            $queryJobs->where('app_deadline', '<=', $request->job_deadline_to);
+        }
+
+        // Sorting
+        $jobSort = $request->get('job_sort', 'created_at_desc');
+        switch($jobSort) {
+            case 'created_at_asc': $queryJobs->orderBy('created_at', 'asc'); break;
+            case 'deadline_asc': $queryJobs->orderBy('app_deadline', 'asc'); break;
+            case 'title_asc': $queryJobs->orderBy('job_title', 'asc'); break;
+            default: $queryJobs->orderBy('created_at', 'desc');
+        }
+
+        $pendingJobs = $queryJobs->get();
+
+        // Similarly for Offers...
+        $queryOffers = ProductOffer::where('status', 'pending')
+            ->where('expiry_date', '>=', now()->toDateString());
+
+        if ($request->filled('offer_search')) {
+            $queryOffers->where(function($q) use ($request) {
+                $q->where('product_name', 'like', '%' . $request->offer_search . '%')
+                ->orWhere('category', 'like', '%' . $request->offer_search . '%');
+            });
+        }
+        if ($request->filled('offer_category')) {
+            $queryOffers->where('category', $request->offer_category);
+        }
+        if ($request->filled('offer_min_price')) {
+            $queryOffers->where('price', '>=', $request->offer_min_price);
+        }
+        if ($request->filled('offer_max_price')) {
+            $queryOffers->where('price', '<=', $request->offer_max_price);
+        }
+
+        $offerSort = $request->get('offer_sort', 'created_at_desc');
+        switch($offerSort) {
+            case 'created_at_asc': $queryOffers->orderBy('created_at', 'asc'); break;
+            case 'expiry_asc': $queryOffers->orderBy('expiry_date', 'asc'); break;
+            case 'price_asc': $queryOffers->orderBy('price', 'asc'); break;
+            default: $queryOffers->orderBy('created_at', 'desc');
+        }
+
+        $pendingOffers = $queryOffers->get();
 
         return view('admin.approval-queue', compact('pendingJobs', 'pendingOffers'));
     }
