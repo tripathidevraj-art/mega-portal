@@ -19,11 +19,25 @@ class JobController extends Controller
 
     public function show($id)
     {
-        $job = JobPosting::active()->findOrFail($id);
-        
-        // Increment view count (optional)
-        $job->increment('views');
-        
+        $job = JobPosting::with('user')->findOrFail($id);
+
+        // Allow:
+        // - Public users: only ACTIVE (approved + not expired) jobs
+        // - Owners: view ANY of their jobs (pending/rejected/expired)
+        if (auth()->check() && $job->user_id === auth()->id()) {
+            // Owner can view any job
+        } else {
+            // Public access: must be approved AND not expired
+            if ($job->status !== 'approved' || $job->is_expired) {
+                abort(404);
+            }
+        }
+
+        // Increment views only for public (non-owner) visits
+        if (!auth()->check() || $job->user_id !== auth()->id()) {
+            $job->increment('views');
+        }
+
         return view('user.jobs.show', compact('job'));
     }
 

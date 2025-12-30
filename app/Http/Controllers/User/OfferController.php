@@ -20,11 +20,25 @@ class OfferController extends Controller
 
     public function show($id)
     {
-        $offer = ProductOffer::active()->findOrFail($id);
-        
-        // Increment view count (optional)
-        $offer->increment('views');
-        
+        $offer = ProductOffer::with('user')->findOrFail($id);
+
+        // Allow: 
+        // - Public users to see only ACTIVE (approved + not expired) offers
+        // - Owners to see their own offers (even pending/rejected/expired)
+        if (auth()->check() && $offer->user_id === auth()->id()) {
+            // Owner can view any of their offers
+        } else {
+            // Public users: only active offers
+            if ($offer->status !== 'approved' || $offer->is_expired) {
+                abort(404);
+            }
+        }
+
+        // Increment views only for public (non-owner) views
+        if (!auth()->check() || $offer->user_id !== auth()->id()) {
+            $offer->increment('views');
+        }
+
         return view('user.offers.show', compact('offer'));
     }
 

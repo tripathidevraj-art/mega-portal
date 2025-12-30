@@ -6,6 +6,10 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\LoginController;
 
+use App\Models\JobPosting;
+use App\Models\ProductOffer;
+use App\Models\JobApplication;
+
 // User Controllers
 use App\Http\Controllers\User\JobController;
 use App\Http\Controllers\User\JobApplicationController;
@@ -93,19 +97,31 @@ Route::post('password/reset', [\App\Http\Controllers\Auth\ResetPasswordControlle
 Route::middleware('auth')->group(function () {
 
     // Dashboard redirect based on role
-    Route::get('/dashboard', function () {
+Route::get('/dashboard', function () {
+    if (auth()->user()->isAdmin()) {
+        return redirect()->route('admin.dashboard');
+    }
 
-        if (auth()->user()->isSuperAdmin()) {
-            return redirect()->route('superadmin.admins.index');
-        }
+    $stats = [
+        'jobs_count' => JobPosting::where('user_id', auth()->id())->count(),
+        'offers_count' => ProductOffer::where('user_id', auth()->id())->count(),
+        'applications_count' => JobApplication::where('user_id', auth()->id())->count(),
+        'profile_complete' => 85, // You can improve this later
+    ];
 
-        if (auth()->user()->isAdmin()) {
-            return redirect()->route('admin.dashboard');
-        }
+    $recentJobs = JobPosting::where('user_id', auth()->id())
+        ->withCount('applications')
+        ->latest()
+        ->limit(5)
+        ->get();
 
-        return view('user.dashboard');
+    $recentOffers = ProductOffer::where('user_id', auth()->id())
+        ->latest()
+        ->limit(5)
+        ->get();
 
-    })->name('user.dashboard');
+    return view('user.dashboard', compact('stats', 'recentJobs', 'recentOffers'));
+})->name('user.dashboard');
 
     // Profile
     Route::get('/profile', [ProfileController::class, 'show'])->name('user.profile');
