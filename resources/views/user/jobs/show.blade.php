@@ -231,6 +231,7 @@
                     <li> 2. Real-time Application Counter</li>
                     <li>3. "Similar Jobs" Section (On Sidebar)</li>
                     <li>4. "Report Job" Button (Trust & Safety)</li>
+                    <li>4. "Report Job" Button (Trust & Safety)</li>
                 </ul>
             </div>
         </div>

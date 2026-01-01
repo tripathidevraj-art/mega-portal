@@ -97,7 +97,9 @@
                     @else
                         <li class="nav-item">
                             <span class="nav-link">
-                                <i class="fas fa-user-circle"></i> {{ auth()->user()->name }}
+                                <a href="{{ route('user.profile') }}" class="text-decoration-none text-light">
+                                    <i class="fas fa-user-circle me-1"></i> {{ auth()->user()->full_name }}
+                                </a>
                                 @if(auth()->user()->isSuspended())
                                     <span class="badge bg-danger">Suspended</span>
                                 @endif
