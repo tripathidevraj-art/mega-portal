@@ -60,26 +60,32 @@
                         @endif
                     </div>
 
-                    <div class="d-flex gap-3 mt-3">
-                        @if($offer->discount > 0)
-                            <div>
-                                <small class="text-muted text-decoration-line-through">
-                                    ${{ number_format($offer->price, 2) }}
-                                </small>
-                            </div>
-                            <div>
-                                <p class="text-success fw-bold h3 mb-0">
-                                    ${{ number_format($offer->final_price, 2) }}
-                                </p>
-                            </div>
-                        @else
-                            <div>
-                                <p class="text-success fw-bold h3 mb-0">
-                                    ${{ number_format($offer->price, 2) }}
-                                </p>
-                            </div>
-                        @endif
-                    </div>
+<div class="d-flex gap-3 mt-3">
+    @if($offer->price !== null)
+        @if($offer->discount > 0)
+            <div>
+                <small class="text-muted text-decoration-line-through">
+                    ${{ number_format($offer->price, 2) }}
+                </small>
+            </div>
+            <div>
+                <p class="text-success fw-bold h3 mb-0">
+                    ${{ number_format($offer->final_price, 2) }}
+                </p>
+            </div>
+        @else
+            <div>
+                <p class="text-success fw-bold h3 mb-0">
+                    ${{ number_format($offer->price, 2) }}
+                </p>
+            </div>
+        @endif
+    @else
+        <div>
+            <p class="text-muted fst-italic h3 mb-0">Price is Not Given</p>
+        </div>
+    @endif
+</div>
                 </div>
 
                 <!-- Product Image -->

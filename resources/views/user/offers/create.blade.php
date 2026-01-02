@@ -18,29 +18,29 @@
                     </div>
 
                     <div class="row">
-    <div class="col-md-6 mb-3">
-        <label class="form-label">Category <span class="text-danger">*</span></label>
-        <select name="category" class="form-select" id="categorySelect" required>
-            <option value="">Select Category</option>
-            <option value="Electronics">Electronics</option>
-            <option value="Fashion">Fashion</option>
-            <option value="Health & Beauty">Health & Beauty</option>
-            <option value="Home & Kitchen">Home & Kitchen</option>
-            <option value="Sports & Outdoors">Sports & Outdoors</option>
-            <option value="Other">Other</option>
-        </select>
-        <div id="otherCategoryField" class="mt-2" style="display: none;">
-            <input type="text" 
-                   name="other_category" 
-                   class="form-control" 
-                   placeholder="Enter your custom category..." 
-                   maxlength="100">
-            <div class="form-text">e.g., Automotive, Books, Services, etc.</div>
-        </div>
-    </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Price ($) <span class="text-danger">*</span></label>
-                            <input type="number" name="price" class="form-control" min="0" step="0.01" placeholder="e.g. 99.99" required>
+                            <label class="form-label">Category <span class="text-danger">*</span></label>
+                            <select name="category" class="form-select" id="categorySelect" required>
+                                <option value="">Select Category</option>
+                                <option value="Electronics">Electronics</option>
+                                <option value="Fashion">Fashion</option>
+                                <option value="Health & Beauty">Health & Beauty</option>
+                                <option value="Home & Kitchen">Home & Kitchen</option>
+                                <option value="Sports & Outdoors">Sports & Outdoors</option>
+                                <option value="Other">Other</option>
+                            </select>
+                            <div id="otherCategoryField" class="mt-2" style="display: none;">
+                                <input type="text" 
+                                    name="other_category" 
+                                    class="form-control" 
+                                    placeholder="Enter your custom category..." 
+                                    maxlength="100">
+                                <div class="form-text">e.g., Automotive, Books, Services, etc.</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Price ($)</label>
+                            <input type="number" name="price" class="form-control" min="0" step="0.01" placeholder="e.g. 99.99">
                         </div>
                     </div>
 
@@ -56,7 +56,7 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Product Image</label>
+                        <label class="form-label">Promo Image</label>
                         <input type="file" name="product_image" class="form-control" accept="image/*">
                         <div class="form-text">Max file size: 2MB. Supported: JPG, PNG, GIF</div>
                     </div>

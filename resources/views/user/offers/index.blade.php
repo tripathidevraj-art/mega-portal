@@ -37,13 +37,17 @@
                     <p class="text-muted small">{{ Str::limit($offer->description, 80) }}</p>
                     
                     <div class="mt-auto">
-                        @if($offer->discount > 0)
-                            <p class="mb-1">
-                                <small class="text-muted"><del>${{ number_format($offer->price, 2) }}</del></small>
-                            </p>
-                            <p class="h5 text-success fw-bold mb-0">${{ number_format($offer->final_price, 2) }}</p>
+                        @if($offer->price !== null)
+                            @if($offer->discount > 0)
+                                <p class="mb-1">
+                                    <small class="text-muted"><del>${{ number_format($offer->price, 2) }}</del></small>
+                                </p>
+                                <p class="h5 text-success fw-bold mb-0">${{ number_format($offer->final_price, 2) }}</p>
+                            @else
+                                <p class="h5 text-success fw-bold mb-0">${{ number_format($offer->price, 2) }}</p>
+                            @endif
                         @else
-                            <p class="h5 text-success fw-bold mb-0">${{ number_format($offer->price, 2) }}</p>
+                            <p class="text-muted fst-italic">Price is Not Given</p>
                         @endif
                         
                         <div class="d-flex justify-content-between align-items-center mt-3">

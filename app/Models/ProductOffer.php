@@ -61,11 +61,18 @@ class ProductOffer extends Model
                     });
     }
 
+    // public function getFinalPriceAttribute()
+    // {
+    //     return $this->price - ($this->price * ($this->discount / 100));
+    // }
     public function getFinalPriceAttribute()
     {
+        if ($this->price === null) {
+            return null;
+        }
         return $this->price - ($this->price * ($this->discount / 100));
     }
-
+    
     public function getIsExpiredAttribute()
     {
         return $this->expiry_date < now()->toDateString();
@@ -75,4 +82,5 @@ class ProductOffer extends Model
     {
         return route('offers.show', $this->id);
     }
+
 }
