@@ -30,8 +30,9 @@
 <div class="bg-dark text-light py-5">
     <div class="container text-center">
         <h1 class="display-4 fw-bold">
-            Welcome Back, {{ Auth::user()->name }} 🎉
+            Welcome Back, {{ Auth::user()->full_name }} 🎉
         </h1>
+        
         <p class="lead mt-3">
             Manage jobs, offers, and your profile in one place.
         </p>

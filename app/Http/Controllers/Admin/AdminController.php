@@ -269,7 +269,7 @@ class AdminController extends Controller
             $userLogQuery->whereDate('created_at', '<=', $request->user_date_to);
         }
 
-        $userLogs = $userLogQuery->latest()->paginate(15, ['*'], 'user_page')->appends($request->except('user_page'));
+        $userLogs = $userLogQuery->latest()->paginate(50, ['*'], 'user_page')->appends($request->except('user_page'));
 
         // ===== ADMINS TAB: Actions done BY admins =====
         $adminLogQuery = AdminActionLog::with(['admin', 'targetUser']);
@@ -296,7 +296,7 @@ class AdminController extends Controller
             $adminLogQuery->whereDate('created_at', '<=', $request->admin_date_to);
         }
 
-        $adminLogs = $adminLogQuery->latest()->paginate(15, ['*'], 'admin_page')->appends($request->except('admin_page'));
+        $adminLogs = $adminLogQuery->latest()->paginate(50, ['*'], 'admin_page')->appends($request->except('admin_page'));
 
         return view('admin.user-logs', compact('userLogs', 'adminLogs'));
     }

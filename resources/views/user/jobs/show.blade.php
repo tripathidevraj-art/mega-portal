@@ -106,6 +106,12 @@
                             <i class="fas fa-clock text-info"></i>
                             <span>Posted {{ $job->created_at->diffForHumans() }}</span>
                         </div>
+                        <div class="meta-item">
+                            <i class="fas fa-users text-success"></i>
+                            <span>
+                                {{ $job->applications_count ?? 0 }} applicant{{ ($job->applications_count ?? 0) != 1 ? 's' : '' }} already applied
+                            </span>
+                        </div>
                     </div>
                 </div>
 
@@ -222,19 +228,6 @@
             </div>
         </div>
 
-        <div class="card shadow-sm border-0">
-            <div class="card-body p-4">
-                <h5 class="card-title mb-4">Ignore This !</h5>
-                <p>Suggestions from my side
-                <ul class="d-grid gap-2">
-                    <li>1. "Save Job" / Bookmark Feature</li>
-                    <li> 2. Real-time Application Counter</li>
-                    <li>3. "Similar Jobs" Section (On Sidebar)</li>
-                    <li>4. "Report Job" Button (Trust & Safety)</li>
-                    <li>4. "Report Job" Button (Trust & Safety)</li>
-                </ul>
-            </div>
-        </div>
         <!-- Expiry Warning -->
         @if($job->app_deadline->lt(now()->addDays(3)))
             <div class="alert alert-warning mt-4 d-flex align-items-center">

@@ -12,7 +12,7 @@
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">My Jobs</div>
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Active Jobs</div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $stats['jobs_count'] }}</div>
                     </div>
                     <div class="col-auto">
@@ -28,7 +28,7 @@
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">My Offers</div>
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Active Offers</div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $stats['offers_count'] }}</div>
                     </div>
                     <div class="col-auto">
@@ -44,7 +44,7 @@
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Applications</div>
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">My Applications</div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $stats['applications_count'] }}</div>
                     </div>
                     <div class="col-auto">
@@ -60,7 +60,7 @@
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Profile</div>
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">My Profile</div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $stats['profile_complete'] }}%</div>
                     </div>
                     <div class="col-auto">
@@ -77,7 +77,7 @@
     <div class="col-md-6 mb-4">
         <div class="card shadow">
             <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                <h6 class="m-0 font-weight-bold text-primary">My Recent Jobs</h6>
+                <h6 class="m-0 font-weight-bold text-primary">Recent Jobs</h6>
                 <a href="{{ route('user.jobs.create') }}" class="btn btn-sm btn-primary">Post New</a>
             </div>
             <div class="card-body">
@@ -125,7 +125,7 @@
     <div class="col-md-6 mb-4">
         <div class="card shadow">
             <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                <h6 class="m-0 font-weight-bold text-success">My Recent Offers</h6>
+                <h6 class="m-0 font-weight-bold text-success">Recent Offers</h6>
                 <a href="{{ route('user.offers.create') }}" class="btn btn-sm btn-success">Post New</a>
             </div>
             <div class="card-body">

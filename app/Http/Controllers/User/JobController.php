@@ -11,15 +11,75 @@ use Illuminate\Support\Facades\Auth;
 
 class JobController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $jobs = JobPosting::active()->with('user')->latest()->paginate(10);
-        return view('user.jobs.index', compact('jobs'));
+        // View toggle
+        $view = in_array($request->get('view'), ['grid', 'list']) ? $request->get('view') : 'grid';
+
+        // Base query: only active (approved + not expired) jobs
+        $query = JobPosting::active()->with('user')->withCount('applications');
+
+        // 🔍 Search
+        if ($search = $request->get('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('job_title', 'LIKE', "%{$search}%")
+                ->orWhere('industry', 'LIKE', "%{$search}%")
+                ->orWhere('job_description', 'LIKE', "%{$search}%");
+            });
+        }
+
+        // 🗂️ Filters
+        if ($request->filled('job_type')) {
+            $query->where('job_type', $request->job_type);
+        }
+
+        if ($request->filled('industry')) {
+            $query->where('industry', $request->industry);
+        }
+
+        if ($request->filled('location')) {
+            $query->where('work_location', 'LIKE', "%{$request->location}%");
+        }
+
+        // 🔄 Sorting
+        $sort = $request->get('sort', 'latest');
+        switch ($sort) {
+            case 'salary_high':
+                $query->orderByRaw("CAST(SUBSTRING_INDEX(salary_range, '–', -1) AS UNSIGNED) DESC");
+                break;
+            case 'salary_low':
+                $query->orderByRaw("CAST(SUBSTRING_INDEX(salary_range, '–', 1) AS UNSIGNED) ASC");
+                break;
+            case 'deadline_soon':
+                $query->orderBy('app_deadline', 'ASC');
+                break;
+            case 'oldest':
+                $query->orderBy('created_at', 'ASC');
+                break;
+            case 'latest':
+            default:
+                $query->orderBy('created_at', 'DESC');
+                break;
+        }
+
+        $jobs = $query->paginate(10)->appends($request->except('page'));
+
+        // Get unique values for filters
+        $industries = JobPosting::active()->distinct()->pluck('industry')->sort();
+        $jobTypes = [
+            'full_time' => 'Full Time',
+            'part_time' => 'Part Time',
+            'contract' => 'Contract',
+            'internship' => 'Internship',
+        ];
+        $locations = JobPosting::active()->distinct()->pluck('work_location')->sort();
+
+        return view('user.jobs.index', compact('jobs', 'view', 'industries', 'jobTypes', 'locations', 'search', 'sort'));
     }
 
     public function show($id)
     {
-        $job = JobPosting::with('user')->findOrFail($id);
+        $job = JobPosting::with('user')->withCount('applications')->findOrFail($id);
 
         // Allow:
         // - Public users: only ACTIVE (approved + not expired) jobs
