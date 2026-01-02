@@ -144,6 +144,7 @@ Route::get('/dashboard', function () {
         Route::get('/create', [JobController::class, 'create'])->name('create');
         Route::post('/store', [JobController::class, 'store'])->name('store');
         Route::get('/{id}/share', [JobController::class, 'share'])->name('share');
+        Route::post('/{id}/report', [JobController::class, 'reportJob'])->name('report');
     });
 
     // User Offers
@@ -176,9 +177,12 @@ Route::middleware(['auth', 'admin'])
         
         Route::post('/jobs/{id}/approve', [ApprovalController::class, 'approveJob'])->name('jobs.approve');
         Route::post('/jobs/{id}/reject', [ApprovalController::class, 'rejectJob'])->name('jobs.reject');
+        Route::get('/reported-jobs', [AdminController::class, 'reportedJobs'])->name('reported-jobs');
+        Route::post('/reported-jobs/{id}/take-action', [AdminController::class, 'takeActionOnReportedJob'])->name('reported-jobs.action');
+        Route::get('/all-reported-jobs', [AdminController::class, 'allReportedJobs'])->name('all-reported-jobs');
+        Route::post('/reported-jobs/{id}/restore', [AdminController::class, 'restoreReportedJob'])->name('reported-jobs.restore');
         Route::post('/offers/{id}/approve', [ApprovalController::class, 'approveOffer'])->name('offers.approve');
         Route::post('/offers/{id}/reject', [ApprovalController::class, 'rejectOffer'])->name('offers.reject');
-        
         // Expired Content
         Route::get('/expired-content', [AdminController::class, 'expiredContent'])->name('expired-content');
         

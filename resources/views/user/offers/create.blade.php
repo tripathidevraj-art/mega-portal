@@ -18,17 +18,26 @@
                     </div>
 
                     <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Category <span class="text-danger">*</span></label>
-                            <select name="category" class="form-select" required>
-                                <option value="">Select Category</option>
-                                <option value="Electronics">Electronics</option>
-                                <option value="Fashion">Fashion</option>
-                                <option value="Health">Health & Beauty</option>
-                                <option value="Home">Home & Kitchen</option>
-                                <option value="Sports">Sports & Outdoors</option>
-                            </select>
-                        </div>
+    <div class="col-md-6 mb-3">
+        <label class="form-label">Category <span class="text-danger">*</span></label>
+        <select name="category" class="form-select" id="categorySelect" required>
+            <option value="">Select Category</option>
+            <option value="Electronics">Electronics</option>
+            <option value="Fashion">Fashion</option>
+            <option value="Health & Beauty">Health & Beauty</option>
+            <option value="Home & Kitchen">Home & Kitchen</option>
+            <option value="Sports & Outdoors">Sports & Outdoors</option>
+            <option value="Other">Other</option>
+        </select>
+        <div id="otherCategoryField" class="mt-2" style="display: none;">
+            <input type="text" 
+                   name="other_category" 
+                   class="form-control" 
+                   placeholder="Enter your custom category..." 
+                   maxlength="100">
+            <div class="form-text">e.g., Automotive, Books, Services, etc.</div>
+        </div>
+    </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Price ($) <span class="text-danger">*</span></label>
                             <input type="number" name="price" class="form-control" min="0" step="0.01" placeholder="e.g. 99.99" required>
@@ -40,7 +49,7 @@
                             <label class="form-label">Discount (%)</label>
                             <input type="number" name="discount" class="form-control" min="0" max="100" placeholder="e.g. 15">
                         </div>
-                        <div class "col-md-6 mb-3">
+                        <div class="col-md-6 mb-3">
                             <label class="form-label">Expiry Date <span class="text-danger">*</span></label>
                             <input type="date" name="expiry_date" class="form-control" min="{{ now()->addDay()->toDateString() }}" required>
                         </div>
@@ -111,7 +120,15 @@ $(document).ready(function() {
             }
         });
     });
-
+        $('#categorySelect').on('change', function() {
+        if (this.value === 'Other') {
+            $('#otherCategoryField').show();
+            $('input[name="other_category"]').prop('required', true);
+        } else {
+            $('#otherCategoryField').hide();
+            $('input[name="other_category"]').prop('required', false).val('');
+        }
+    });
     // Set min expiry date to tomorrow
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);

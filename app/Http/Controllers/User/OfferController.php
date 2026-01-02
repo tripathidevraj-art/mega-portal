@@ -75,6 +75,9 @@ class OfferController extends Controller
         $data['user_id'] = Auth::id();
         $data['status'] = 'pending';
 
+        if ($request->category === 'Other' && $request->filled('other_category')) {
+            $data['category'] = trim(ucfirst($request->other_category));
+        }
         if ($request->hasFile('product_image')) {
             $path = $request->file('product_image')->store('product-offers', 'public');
             $data['product_image'] = $path;

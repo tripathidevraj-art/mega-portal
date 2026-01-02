@@ -599,8 +599,8 @@
                 <div class="modal-body">
                     <p>Are you sure you want to activate this user?</p>
                     <div class="mb-3">
-                        <label class="form-label">Reason (Optional but recommended)</label>
-                        <textarea name="reason" class="form-control" rows="2" placeholder="e.g., Suspension period completed..."></textarea>
+                        <label class="form-label">Reason</label>
+                        <textarea name="reason" class="form-control" rows="2" placeholder="e.g., Suspension period completed..." requird></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">

@@ -14,14 +14,21 @@ class StoreProductOfferRequest extends FormRequest
 
     public function rules(): array
     {
+    return [
+        'product_name' => 'required|string|max:255',
+        'category' => 'required|string|max:100',
+        'other_category' => 'nullable|required_if:category,Other|string|max:100',
+        'description' => 'required|string',
+        'price' => 'required|numeric|min:0',
+        'discount' => 'nullable|numeric|min:0|max:100',
+        'expiry_date' => 'required|date|after:today',
+        'product_image' => 'nullable|image|max:2048',
+    ];
+    }
+    public function messages()
+    {
         return [
-            'product_name' => 'required|string|max:255',
-            'category' => 'required|string|max:100',
-            'description' => 'required|string',
-            'price' => 'required|numeric|min:0',
-            'discount' => 'nullable|numeric|min:0|max:100',
-            'expiry_date' => 'required|date|after:today',
-            'product_image' => 'nullable|image|max:2048',
+            'other_category.required_if' => 'Please specify your custom category.',
         ];
     }
 }

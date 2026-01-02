@@ -145,6 +145,15 @@
                                     <i class="fas fa-paper-plane me-2"></i> Apply Now
                                 </a>
                             @endif
+                            <!-- Report Job Section -->
+@if(auth()->check() && auth()->id() !== $job->user_id)
+<div class="mt-4 pt-3 border-top">
+    <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#reportJobModal">
+        <i class="fas fa-exclamation-triangle me-1"></i> Report This Job
+    </button>
+</div>
+
+@endif
                         @else
                             <div class="alert alert-warning d-flex align-items-center">
                                 <i class="fas fa-exclamation-triangle me-2 fs-4"></i>
@@ -239,6 +248,43 @@
 </div>
 @endsection
 
+<!-- Report Modal -->
+<div class="modal fade" id="reportJobModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Report Job: {{ $job->job_title }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ route('user.jobs.report', $job->id) }}">
+                @csrf
+                <div class="modal-body">
+                    <p class="text-muted">Help us keep the platform safe by reporting inappropriate content.</p>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Reason for Report</label>
+                        <select name="reason" class="form-select" required>
+                            <option value="">Select a reason</option>
+                            <option value="inappropriate">Inappropriate Content</option>
+                            <option value="fake">Fake or Fraudulent</option>
+                            <option value="spam">Spam / Irrelevant</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Additional Details (Optional)</label>
+                        <textarea name="details" class="form-control" rows="3" placeholder="Please provide more information..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Submit Report</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 @push('scripts')
 <script>
 function copyJobLink() {

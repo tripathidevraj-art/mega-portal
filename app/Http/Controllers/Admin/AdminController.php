@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\JobReport;
+use App\Mail\JobRestoredNotification;
 use App\Models\JobPosting;
 use App\Models\ProductOffer;
 use App\Models\UserActivityLog;
@@ -432,4 +434,122 @@ class AdminController extends Controller
 
         return view('admin.users-management', compact('users', 'stats', 'request'));
     }
+    public function reportedJobs(Request $request)
+    {
+        $query = JobReport::with(['job.user', 'reporter'])
+            ->where('status', 'pending')
+            ->latest();
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('job', function($q) use ($search) {
+                $q->where('job_title', 'like', "%{$search}%")
+                ->orWhere('industry', 'like', "%{$search}%");
+            })->orWhereHas('reporter', function($q) use ($search) {
+                $q->where('full_name', 'like', "%{$search}%")
+                ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('reason')) {
+            $query->where('reason', $request->reason);
+        }
+
+        $reports = $query->paginate(15);
+
+        return view('admin.reported-jobs', compact('reports'));
+    }
+    
+    public function takeActionOnReportedJob(Request $request, $reportId)
+    {
+        $request->validate([
+            'action' => 'required|in:delete_job,dismiss_report',
+            'admin_notes' => 'nullable|string|max:500',
+        ]);
+
+        $report = JobReport::with('job')->findOrFail($reportId);
+        $job = $report->job;
+
+        DB::transaction(function () use ($report, $job, $request) {
+            // Mark report as handled
+            $report->update(['status' => 'action_taken']);
+
+            // Log admin action
+            AdminActionLog::create([
+                'admin_id' => auth()->id(),
+                'action' => 'handled_job_report',
+                'target_user_id' => $job->user_id,
+                'target_type' => 'job',
+                'target_id' => $job->id,
+                'reason' => $request->admin_notes,
+            ]);
+
+            if ($request->action === 'delete_job') {
+                // Delete the job (soft delete)
+                $job->update(['status' => 'reported']);
+
+                // Notify job owner
+                Mail::to($job->user->email)->send(new \App\Mail\JobRemovedDueToReport($job, $request->admin_notes));
+            }
+        });
+
+        return back()->with('success', 'Action taken successfully.');
+    }
+
+    public function allReportedJobs(Request $request)
+    {
+        $query = JobReport::with(['job.user', 'reporter'])->latest();
+
+        // Filter by status (optional)
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Search
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('job', function($q) use ($search) {
+                $q->where('job_title', 'like', "%{$search}%");
+            })->orWhereHas('reporter', function($q) use ($search) {
+                $q->where('full_name', 'like', "%{$search}%");
+            });
+        }
+
+        $reports = $query->paginate(15);
+
+        return view('admin.all-reported-jobs', compact('reports'));
+    }
+
+public function restoreReportedJob(Request $request, $reportId)
+{
+    $report = JobReport::with('job')->findOrFail($reportId);
+    $job = $report->job;
+
+    if ($job->status !== 'reported') {
+        return back()->with('error', 'Job is not in reported status.');
+    }
+
+    DB::transaction(function () use ($report, $job) {
+        $job->update(['status' => 'approved']);
+        $report->update(['status' => 'action_taken']);
+
+        AdminActionLog::create([
+            'admin_id' => auth()->id(),
+            'action' => 'restored_job',
+            'target_user_id' => $job->user_id,
+            'target_type' => 'job',
+            'target_id' => $job->id,
+            'reason' => 'Job restored after report review',
+        ]);
+
+        // ✅ SEND EMAIL TO JOB OWNER
+        try {
+            Mail::to($job->user->email)->send(new JobRestoredNotification($job));
+        } catch (\Exception $e) {
+            \Log::error('Job restored email failed: ' . $e->getMessage());
+        }
+    });
+
+    return back()->with('success', 'Job restored to public listings!');
+}
 }

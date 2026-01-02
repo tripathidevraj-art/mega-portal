@@ -4,10 +4,13 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\JobPosting;
+use App\Models\JobReport;
+use App\Mail\NewJobReportNotification;
 use App\Http\Requests\StoreJobPostingRequest;
 use App\Models\UserActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class JobController extends Controller
 {
@@ -172,4 +175,43 @@ class JobController extends Controller
             'links' => $shareLinks
         ]);
     }
+
+public function reportJob(Request $request, $jobId)
+{
+    $request->validate([
+        'reason' => 'required|in:inappropriate,fake,spam,other',
+        'details' => 'nullable|string|max:1000',
+    ]);
+
+    $job = JobPosting::findOrFail($jobId);
+
+    if ($job->user_id === auth()->id()) {
+        return back()->with('error', 'You cannot report your own job.');
+    }
+
+    if (JobReport::where('job_id', $jobId)->where('reported_by', auth()->id())->exists()) {
+        return back()->with('error', 'You have already reported this job.');
+    }
+
+    $report = JobReport::create([
+        'job_id' => $jobId,
+        'reported_by' => auth()->id(),
+        'reason' => $request->reason,
+        'details' => $request->details,
+    ]);
+
+    // ✅ SEND EMAIL TO ALL ADMINS
+    try {
+        $admins = \App\Models\User::where('role', 'admin')->get();
+        foreach ($admins as $admin) {
+            if ($admin->email) {
+                Mail::to($admin->email)->send(new NewJobReportNotification($report));
+            }
+        }
+    } catch (\Exception $e) {
+        \Log::error('New job report email failed: ' . $e->getMessage());
+    }
+
+    return back()->with('success', 'Thank you for your report. Our team will review it shortly.');
+}
 }

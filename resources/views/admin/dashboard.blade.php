@@ -98,40 +98,58 @@
 </div>
 
 <div class="row">
-    <!-- Quick Actions -->
-    <div class="col-lg-6 mb-4">
-        <div class="card shadow">
-            <div class="card-header bg-primary text-white">
-                <h6 class="m-0 font-weight-bold">Quick Actions</h6>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <a href="{{ route('admin.approval-queue') }}" class="btn btn-warning btn-block">
-                            <i class="fas fa-tasks"></i> Approval Queue
-                            <span class="badge bg-danger">{{ $stats['pending_jobs'] + $stats['pending_offers'] }}</span>
-                        </a>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <a href="{{ route('admin.expired-content') }}" class="btn btn-secondary btn-block">
-                            <i class="fas fa-history"></i> Expired Content
-                            <span class="badge bg-light text-dark">{{ $stats['expired_jobs'] + $stats['expired_offers'] }}</span>
-                        </a>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <a href="{{ route('admin.users-management') }}" class="btn btn-info btn-block">
-                            <i class="fas fa-users-cog"></i> Manage Users
-                        </a>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <a href="{{ route('admin.user-analytics') }}" class="btn btn-success btn-block">
-                            <i class="fas fa-chart-line"></i> User Analytics
-                        </a>
-                    </div>
+<!-- Quick Actions -->
+<div class="col-lg-6 mb-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h6 class="m-0 font-weight-bold">Quick Actions</h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <a href="{{ route('admin.approval-queue') }}" class="btn btn-warning btn-block">
+                        <i class="fas fa-tasks"></i> Approval Queue
+                        <span class="badge bg-danger">{{ $stats['pending_jobs'] + $stats['pending_offers'] }}</span>
+                    </a>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <a href="{{ route('admin.expired-content') }}" class="btn btn-secondary btn-block">
+                        <i class="fas fa-history"></i> Expired Content
+                        <span class="badge bg-light text-dark">{{ $stats['expired_jobs'] + $stats['expired_offers'] }}</span>
+                    </a>
+                </div>
+                <!-- 👇 REPORTED JOBS (Pending) -->
+                <div class="col-md-6 mb-3">
+                    <a href="{{ route('admin.reported-jobs') }}" class="btn btn-danger btn-block">
+                        <i class="fas fa-exclamation-triangle"></i> Reported Jobs
+                        @php
+                            $pendingReports = \App\Models\JobReport::where('status', 'pending')->count();
+                        @endphp
+                        @if($pendingReports > 0)
+                            <span class="badge bg-light text-dark ms-1">{{ $pendingReports }}</span>
+                        @endif
+                    </a>
+                </div>
+                <!-- 👇 ALL REPORTS (History) -->
+                <div class="col-md-6 mb-3">
+                    <a href="{{ route('admin.all-reported-jobs') }}" class="btn btn-info btn-block">
+                        <i class="fas fa-clipboard-list"></i> All Reports
+                    </a>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <a href="{{ route('admin.users-management') }}" class="btn btn-info btn-block">
+                        <i class="fas fa-users-cog"></i> Manage Users
+                    </a>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <a href="{{ route('admin.user-analytics') }}" class="btn btn-success btn-block">
+                        <i class="fas fa-chart-line"></i> User Analytics
+                    </a>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
     <!-- System Stats -->
     <div class="col-lg-6 mb-4">

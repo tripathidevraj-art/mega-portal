@@ -82,4 +82,9 @@ class JobPosting extends Model
         $userId = $userId ?: auth()->id();
         return $this->applications()->where('user_id', $userId)->exists();
     }
+
+    public function forceDelete()
+    {
+        return parent::forceDelete();
+    }
 }
