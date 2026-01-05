@@ -47,7 +47,7 @@
                             <div class="col-md-2">
                                 <select name="job_sort" class="form-select">
                                     <option value="created_at" {{ request('job_sort') == 'created_at' ? 'selected' : '' }}>Created Date</option>
-                                    <option value="app_deadline" {{ request('job_sort') == 'app_deadline' ? 'selected' : '' }}>Deadline</option>
+                                    <option value="app_deadline" {{ request('job_sort') == 'app_deadline' ? 'selected' : '' }}>Expire On</option>
                                     <option value="views" {{ request('job_sort') == 'views' ? 'selected' : '' }}>Views</option>
                                     <option value="job_title" {{ request('job_sort') == 'job_title' ? 'selected' : '' }}>Title</option>
                                 </select>
@@ -72,13 +72,133 @@
                                 <table class="table table-hover">
                                     <thead class="table-light">
                                         <tr>
-                                            <th>Job Title</th>
-                                            <th>Industry</th>
-                                            <th>Type</th>
-                                            <th>Location</th>
-                                            <th>Deadline</th>
+                                            <th>
+                                                @php
+                                                    $sortField = 'job_title';
+                                                    $currentSort = request('job_sort', 'created_at');
+                                                    $currentOrder = request('job_order', 'desc');
+                                                    $isActive = $currentSort === $sortField;
+                                                    $newOrder = $isActive && $currentOrder === 'asc' ? 'desc' : 'asc';
+                                                @endphp
+                                                <a href="{{ request()->fullUrlWithQuery(['job_sort' => $sortField, 'job_order' => $newOrder, 'page' => 1]) }}" class="text-decoration-none">
+                                                    Job Title
+                                                    @if($isActive)
+                                                        @if($currentOrder === 'asc')
+                                                            <i class="fas fa-sort-up text-primary"></i>
+                                                        @else
+                                                            <i class="fas fa-sort-down text-primary"></i>
+                                                        @endif
+                                                    @else
+                                                        <i class="fas fa-sort text-muted"></i>
+                                                    @endif
+                                                </a>
+                                            </th>
+                                            <th>
+                                                @php
+                                                    $sortField = 'industry';
+                                                    $currentSort = request('job_sort', 'created_at');
+                                                    $currentOrder = request('job_order', 'desc');
+                                                    $isActive = $currentSort === $sortField;
+                                                    $newOrder = $isActive && $currentOrder === 'asc' ? 'desc' : 'asc';
+                                                @endphp
+                                                <a href="{{ request()->fullUrlWithQuery(['job_sort' => $sortField, 'job_order' => $newOrder, 'page' => 1]) }}" class="text-decoration-none">
+                                                    Industry
+                                                    @if($isActive)
+                                                        @if($currentOrder === 'asc')
+                                                            <i class="fas fa-sort-up text-primary"></i>
+                                                        @else
+                                                            <i class="fas fa-sort-down text-primary"></i>
+                                                        @endif
+                                                    @else
+                                                        <i class="fas fa-sort text-muted"></i>
+                                                    @endif
+                                                </a>
+                                            </th>
+                                            <th>
+                                                @php
+                                                    $sortField = 'job_type';
+                                                    $currentSort = request('job_sort', 'created_at');
+                                                    $currentOrder = request('job_order', 'desc');
+                                                    $isActive = $currentSort === $sortField;
+                                                    $newOrder = $isActive && $currentOrder === 'asc' ? 'desc' : 'asc';
+                                                @endphp
+                                                <a href="{{ request()->fullUrlWithQuery(['job_sort' => $sortField, 'job_order' => $newOrder, 'page' => 1]) }}" class="text-decoration-none">
+                                                    Type
+                                                    @if($isActive)
+                                                        @if($currentOrder === 'asc')
+                                                            <i class="fas fa-sort-up text-primary"></i>
+                                                        @else
+                                                            <i class="fas fa-sort-down text-primary"></i>
+                                                        @endif
+                                                    @else
+                                                        <i class="fas fa-sort text-muted"></i>
+                                                    @endif
+                                                </a>
+                                            </th>
+                                            <th>
+                                                @php
+                                                    $sortField = 'work_location';
+                                                    $currentSort = request('job_sort', 'created_at');
+                                                    $currentOrder = request('job_order', 'desc');
+                                                    $isActive = $currentSort === $sortField;
+                                                    $newOrder = $isActive && $currentOrder === 'asc' ? 'desc' : 'asc';
+                                                @endphp
+                                                <a href="{{ request()->fullUrlWithQuery(['job_sort' => $sortField, 'job_order' => $newOrder, 'page' => 1]) }}" class="text-decoration-none">
+                                                    Location
+                                                    @if($isActive)
+                                                        @if($currentOrder === 'asc')
+                                                            <i class="fas fa-sort-up text-primary"></i>
+                                                        @else
+                                                            <i class="fas fa-sort-down text-primary"></i>
+                                                        @endif
+                                                    @else
+                                                        <i class="fas fa-sort text-muted"></i>
+                                                    @endif
+                                                </a>
+                                            </th>
+                                            <th>
+                                                @php
+                                                    $sortField = 'app_deadline';
+                                                    $currentSort = request('job_sort', 'created_at');
+                                                    $currentOrder = request('job_order', 'desc');
+                                                    $isActive = $currentSort === $sortField;
+                                                    $newOrder = $isActive && $currentOrder === 'asc' ? 'desc' : 'asc';
+                                                @endphp
+                                                <a href="{{ request()->fullUrlWithQuery(['job_sort' => $sortField, 'job_order' => $newOrder, 'page' => 1]) }}" class="text-decoration-none">
+                                                    Expire On
+                                                    @if($isActive)
+                                                        @if($currentOrder === 'asc')
+                                                            <i class="fas fa-sort-up text-primary"></i>
+                                                        @else
+                                                            <i class="fas fa-sort-down text-primary"></i>
+                                                        @endif
+                                                    @else
+                                                        <i class="fas fa-sort text-muted"></i>
+                                                    @endif
+                                                </a>
+                                            </th>
                                             <th>Posted By</th>
-                                            <th>Views</th>
+                                            <th>
+                                                @php
+                                                    $sortField = 'views';
+                                                    $currentSort = request('job_sort', 'created_at');
+                                                    $currentOrder = request('job_order', 'desc');
+                                                    $isActive = $currentSort === $sortField;
+                                                    $newOrder = $isActive && $currentOrder === 'asc' ? 'desc' : 'asc';
+                                                @endphp
+                                                <a href="{{ request()->fullUrlWithQuery(['job_sort' => $sortField, 'job_order' => $newOrder, 'page' => 1]) }}" class="text-decoration-none">
+                                                    Views
+                                                    @if($isActive)
+                                                        @if($currentOrder === 'asc')
+                                                            <i class="fas fa-sort-up text-primary"></i>
+                                                        @else
+                                                            <i class="fas fa-sort-down text-primary"></i>
+                                                        @endif
+                                                    @else
+                                                        <i class="fas fa-sort text-muted"></i>
+                                                    @endif
+                                                </a>
+                                            </th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
@@ -180,13 +300,113 @@
                                 <table class="table table-hover">
                                     <thead class="table-light">
                                         <tr>
-                                            <th>Product</th>
-                                            <th>Category</th>
-                                            <th>Price</th>
+                                            <th>
+                                                @php
+                                                    $sortField = 'product_name';
+                                                    $currentSort = request('offer_sort', 'created_at');
+                                                    $currentOrder = request('offer_order', 'desc');
+                                                    $isActive = $currentSort === $sortField;
+                                                    $newOrder = $isActive && $currentOrder === 'asc' ? 'desc' : 'asc';
+                                                @endphp
+                                                <a href="{{ request()->fullUrlWithQuery(['offer_sort' => $sortField, 'offer_order' => $newOrder, 'page' => 1]) }}" class="text-decoration-none">
+                                                    Product
+                                                    @if($isActive)
+                                                        @if($currentOrder === 'asc')
+                                                            <i class="fas fa-sort-up text-primary"></i>
+                                                        @else
+                                                            <i class="fas fa-sort-down text-primary"></i>
+                                                        @endif
+                                                    @else
+                                                        <i class="fas fa-sort text-muted"></i>
+                                                    @endif
+                                                </a>
+                                            </th>
+                                            <th>
+                                                @php
+                                                    $sortField = 'category';
+                                                    $currentSort = request('offer_sort', 'created_at');
+                                                    $currentOrder = request('offer_order', 'desc');
+                                                    $isActive = $currentSort === $sortField;
+                                                    $newOrder = $isActive && $currentOrder === 'asc' ? 'desc' : 'asc';
+                                                @endphp
+                                                <a href="{{ request()->fullUrlWithQuery(['offer_sort' => $sortField, 'offer_order' => $newOrder, 'page' => 1]) }}" class="text-decoration-none">
+                                                    Category
+                                                    @if($isActive)
+                                                        @if($currentOrder === 'asc')
+                                                            <i class="fas fa-sort-up text-primary"></i>
+                                                        @else
+                                                            <i class="fas fa-sort-down text-primary"></i>
+                                                        @endif
+                                                    @else
+                                                        <i class="fas fa-sort text-muted"></i>
+                                                    @endif
+                                                </a>
+                                            </th>
+                                            <th>
+                                                @php
+                                                    $sortField = 'price';
+                                                    $currentSort = request('offer_sort', 'created_at');
+                                                    $currentOrder = request('offer_order', 'desc');
+                                                    $isActive = $currentSort === $sortField;
+                                                    $newOrder = $isActive && $currentOrder === 'asc' ? 'desc' : 'asc';
+                                                @endphp
+                                                <a href="{{ request()->fullUrlWithQuery(['offer_sort' => $sortField, 'offer_order' => $newOrder, 'page' => 1]) }}" class="text-decoration-none">
+                                                    Price
+                                                    @if($isActive)
+                                                        @if($currentOrder === 'asc')
+                                                            <i class="fas fa-sort-up text-primary"></i>
+                                                        @else
+                                                            <i class="fas fa-sort-down text-primary"></i>
+                                                        @endif
+                                                    @else
+                                                        <i class="fas fa-sort text-muted"></i>
+                                                    @endif
+                                                </a>
+                                            </th>
                                             <th>Discount</th>
-                                            <th>Expiry</th>
+                                            <th>
+                                                @php
+                                                    $sortField = 'expiry_date';
+                                                    $currentSort = request('offer_sort', 'created_at');
+                                                    $currentOrder = request('offer_order', 'desc');
+                                                    $isActive = $currentSort === $sortField;
+                                                    $newOrder = $isActive && $currentOrder === 'asc' ? 'desc' : 'asc';
+                                                @endphp
+                                                <a href="{{ request()->fullUrlWithQuery(['offer_sort' => $sortField, 'offer_order' => $newOrder, 'page' => 1]) }}" class="text-decoration-none">
+                                                    Expire On
+                                                    @if($isActive)
+                                                        @if($currentOrder === 'asc')
+                                                            <i class="fas fa-sort-up text-primary"></i>
+                                                        @else
+                                                            <i class="fas fa-sort-down text-primary"></i>
+                                                        @endif
+                                                    @else
+                                                        <i class="fas fa-sort text-muted"></i>
+                                                    @endif
+                                                </a>
+                                            </th>
                                             <th>Posted By</th>
-                                            <th>Views</th>
+                                            <th>
+                                                @php
+                                                    $sortField = 'views';
+                                                    $currentSort = request('offer_sort', 'created_at');
+                                                    $currentOrder = request('offer_order', 'desc');
+                                                    $isActive = $currentSort === $sortField;
+                                                    $newOrder = $isActive && $currentOrder === 'asc' ? 'desc' : 'asc';
+                                                @endphp
+                                                <a href="{{ request()->fullUrlWithQuery(['offer_sort' => $sortField, 'offer_order' => $newOrder, 'page' => 1]) }}" class="text-decoration-none">
+                                                    Views
+                                                    @if($isActive)
+                                                        @if($currentOrder === 'asc')
+                                                            <i class="fas fa-sort-up text-primary"></i>
+                                                        @else
+                                                            <i class="fas fa-sort-down text-primary"></i>
+                                                        @endif
+                                                    @else
+                                                        <i class="fas fa-sort text-muted"></i>
+                                                    @endif
+                                                </a>
+                                            </th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>

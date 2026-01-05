@@ -12,11 +12,56 @@ use Illuminate\Support\Facades\Storage;
 
 class OfferController extends Controller
 {
-    public function index()
-    {
-        $offers = ProductOffer::active()->with('user')->latest()->paginate(10);
-        return view('user.offers.index', compact('offers'));
+public function index(Request $request)
+{
+    $view = in_array($request->get('view'), ['grid', 'list']) ? $request->get('view') : 'grid';
+
+    $query = ProductOffer::active()->with('user');
+
+    // 🔍 Search
+    if ($search = $request->get('search')) {
+        $query->where(function ($q) use ($search) {
+            $q->where('product_name', 'LIKE', "%{$search}%")
+              ->orWhere('description', 'LIKE', "%{$search}%")
+              ->orWhere('category', 'LIKE', "%{$search}%");
+        });
     }
+
+    // 🗂️ Category filter only
+    if ($request->filled('category')) {
+        $query->where('category', $request->category);
+    }
+
+    // 🔄 Sorting
+    $sort = $request->get('sort', 'latest');
+    switch ($sort) {
+        case 'price_high':
+            $query->orderBy('price', 'DESC');
+            break;
+        case 'price_low':
+            $query->orderBy('price', 'ASC');
+            break;
+        case 'discount_high':
+            $query->orderBy('discount', 'DESC');
+            break;
+        case 'expiry_soon':
+            $query->orderBy('expiry_date', 'ASC');
+            break;
+        case 'oldest':
+            $query->orderBy('created_at', 'ASC');
+            break;
+        case 'latest':
+        default:
+            $query->orderBy('created_at', 'DESC');
+            break;
+    }
+
+    $offers = $query->paginate(10)->appends($request->except('page'));
+
+    $categories = ProductOffer::active()->distinct()->pluck('category')->sort();
+
+    return view('user.offers.index', compact('offers', 'view', 'categories'));
+}
 
     public function show($id)
     {

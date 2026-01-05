@@ -47,102 +47,111 @@
     font-size: 1.1rem;
 }
 
-.card {
+.hover-card {
     transition: transform 0.2s, box-shadow 0.2s;
-    cursor: default;
 }
-
-.card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+.hover-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12) !important;
+    border-color: #e2e8f0 !important;
 }
 </style>
 @endpush
 @section('content')
 <div class="row">
-    <div class="col-12">
-                        <!-- User Status Stats -->
-<!-- User Status Stats Cards -->
 <div class="row g-3 mb-4">
     <!-- Verified -->
     <div class="col-6 col-md-2">
-        <div class="card shadow-sm border-0 h-100 bg-light">
-            <div class="card-body text-center p-3">
-                <div class="icon-circle bg-success text-white mx-auto mb-2">
-                    <i class="fas fa-user-check"></i>
+        <a href="{{ request()->fullUrlWithQuery(['status' => 'verified', 'page' => 1]) }}" class="text-decoration-none">
+            <div class="card shadow-sm border-0 h-100 bg-light hover-card">
+                <div class="card-body text-center p-3">
+                    <div class="icon-circle bg-success text-white mx-auto mb-2">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <div class="text-muted small fw-bold">Verified</div>
+                    <div class="fs-5 fw-bold text-success">{{ $stats['verified'] }}</div>
                 </div>
-                <div class="text-muted small fw-bold">Verified</div>
-                <div class="fs-5 fw-bold text-success">{{ $stats['verified'] }}</div>
             </div>
-        </div>
+        </a>
     </div>
 
     <!-- Pending Approval -->
     <div class="col-6 col-md-2">
-        <div class="card shadow-sm border-0 h-100 bg-light">
-            <div class="card-body text-center p-3">
-                <div class="icon-circle bg-warning text-white mx-auto mb-2">
-                    <i class="fas fa-hourglass-half"></i>
+        <a href="{{ request()->fullUrlWithQuery(['status' => 'pending', 'email_verified' => 'verified', 'page' => 1]) }}" class="text-decoration-none">
+            <div class="card shadow-sm border-0 h-100 bg-light hover-card">
+                <div class="card-body text-center p-3">
+                    <div class="icon-circle bg-warning text-white mx-auto mb-2">
+                        <i class="fas fa-hourglass-half"></i>
+                    </div>
+                    <div class="text-muted small fw-bold">Pending</div>
+                    <div class="fs-5 fw-bold text-warning">{{ $stats['pending_verified'] }}</div>
                 </div>
-                <div class="text-muted small fw-bold">Pending</div>
-                <div class="fs-5 fw-bold text-warning">{{ $stats['pending_verified'] }}</div>
             </div>
-        </div>
+        </a>
     </div>
 
     <!-- Unverified (Email Not Verified) -->
     <div class="col-6 col-md-2">
-        <div class="card shadow-sm border-0 h-100 bg-light">
-            <div class="card-body text-center p-3">
-                <div class="icon-circle bg-secondary text-white mx-auto mb-2">
-                    <i class="fas fa-envelope"></i>
+        <a href="{{ request()->fullUrlWithQuery(['status' => 'pending', 'email_verified' => 'unverified', 'page' => 1]) }}" class="text-decoration-none">
+            <div class="card shadow-sm border-0 h-100 bg-light hover-card">
+                <div class="card-body text-center p-3">
+                    <div class="icon-circle bg-secondary text-white mx-auto mb-2">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="text-muted small fw-bold">Unverified</div>
+                    <div class="fs-5 fw-bold text-secondary">{{ $stats['unverified'] }}</div>
                 </div>
-                <div class="text-muted small fw-bold">Unverified</div>
-                <div class="fs-5 fw-bold text-secondary">{{ $stats['unverified'] }}</div>
             </div>
-        </div>
+        </a>
     </div>
 
     <!-- Rejected -->
     <div class="col-6 col-md-2">
-        <div class="card shadow-sm border-0 h-100 bg-light">
-            <div class="card-body text-center p-3">
-                <div class="icon-circle bg-dark text-white mx-auto mb-2">
-                    <i class="fas fa-user-times"></i>
+        <a href="{{ request()->fullUrlWithQuery(['status' => 'rejected', 'page' => 1]) }}" class="text-decoration-none">
+            <div class="card shadow-sm border-0 h-100 bg-light hover-card">
+                <div class="card-body text-center p-3">
+                    <div class="icon-circle bg-dark text-white mx-auto mb-2">
+                        <i class="fas fa-user-times"></i>
+                    </div>
+                    <div class="text-muted small fw-bold">Rejected</div>
+                    <div class="fs-5 fw-bold text-dark">{{ $stats['rejected'] }}</div>
                 </div>
-                <div class="text-muted small fw-bold">Rejected</div>
-                <div class="fs-5 fw-bold text-dark">{{ $stats['rejected'] }}</div>
             </div>
-        </div>
+        </a>
     </div>
 
     <!-- Suspended -->
     <div class="col-6 col-md-2">
-        <div class="card shadow-sm border-0 h-100 bg-light">
-            <div class="card-body text-center p-3">
-                <div class="icon-circle bg-danger text-white mx-auto mb-2">
-                    <i class="fas fa-user-slash"></i>
+        <a href="{{ request()->fullUrlWithQuery(['status' => 'suspended', 'page' => 1]) }}" class="text-decoration-none">
+            <div class="card shadow-sm border-0 h-100 bg-light hover-card">
+                <div class="card-body text-center p-3">
+                    <div class="icon-circle bg-danger text-white mx-auto mb-2">
+                        <i class="fas fa-user-slash"></i>
+                    </div>
+                    <div class="text-muted small fw-bold">Suspended</div>
+                    <div class="fs-5 fw-bold text-danger">{{ $stats['suspended'] }}</div>
                 </div>
-                <div class="text-muted small fw-bold">Suspended</div>
-                <div class="fs-5 fw-bold text-danger">{{ $stats['suspended'] }}</div>
             </div>
-        </div>
+        </a>
     </div>
 
-    <!-- Total -->
+    <!-- Total (Clear Filters) -->
     <div class="col-6 col-md-2">
-        <div class="card shadow-sm border-0 h-100 bg-light">
-            <div class="card-body text-center p-3">
-                <div class="icon-circle bg-primary text-white mx-auto mb-2">
-                    <i class="fas fa-users"></i>
-                </div>
-                <div class="text-muted small fw-bold">Total</div>
-                <div class="fs-5 fw-bold text-primary">
-                    {{ $stats['verified'] + $stats['pending_verified'] + $stats['rejected'] + $stats['suspended'] }}
+        <a href="{{ route('admin.users-management') }}" class="text-decoration-none">
+            <div class="card shadow-sm border-0 h-100 bg-light hover-card">
+                <div class="card-body text-center p-3">
+                    <div class="icon-circle bg-primary text-white mx-auto mb-2">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="text-muted small fw-bold">Total</div>
+                    <div class="fs-5 fw-bold text-primary">
+                        {{ $stats['verified'] + $stats['pending_verified'] + $stats['rejected'] + $stats['suspended'] }}
+                    </div>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
+</div>
 </div>
         <div class="card shadow">
             <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
@@ -562,25 +571,56 @@
                 <h5 class="modal-title">Suspend User</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="suspendForm" method="POST">
+            <form id="suspendForm" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-body">
-                    <p>Enter suspension details:</p>
-                    
+                    <p>Select a reason for suspension:</p>
+
+                    <!-- Predefined Reasons (Dropdown) -->
                     <div class="mb-3">
                         <label class="form-label">Reason <span class="text-danger">*</span></label>
-                        <textarea name="reason" class="form-control" rows="3" placeholder="e.g., Violated terms..." required></textarea>
+                        <select name="predefined_reason" id="predefinedReason" class="form-select" required>
+                            <option value="">-- Select a reason --</option>
+                            <option value="inappropriate_content">Inappropriate Content</option>
+                            <option value="spam_or_scam">Spam or Scam Activity</option>
+                            <option value="fake_profile">Fake or Incomplete Profile</option>
+                            <option value="policy_violation">Violation of Platform Policies</option>
+                            <option value="payment_fraud">Payment or Financial Fraud</option>
+                            <option value="abusive_behavior">Abusive or Harassing Behavior</option>
+                            <option value="other">Other (Specify Below)</option>
+                        </select>
                     </div>
-                    
+
+                    <!-- Custom Reason (Appears only if "Other" is selected) -->
+                    <div class="mb-3" id="customReasonGroup" style="display: none;">
+                        <label class="form-label">Specify Reason <span class="text-danger">*</span></label>
+                        <textarea name="custom_reason" class="form-control" rows="2" placeholder="Please provide details..."></textarea>
+                        <div class="form-text">Required when "Other" is selected.</div>
+                    </div>
+
+                    <!-- Hidden final reason field (sent to server) -->
+                    <input type="hidden" name="reason" id="finalReason" required>
+
+                    <!-- Suspension End Date -->
                     <div class="mb-3">
                         <label class="form-label">Suspension End Date <span class="text-danger">*</span></label>
-                        <input type="date" name="suspended_until" class="form-control" required>
+                        <input type="date" name="suspended_until" class="form-control" 
+                               min="{{ \Carbon\Carbon::today()->format('Y-m-d') }}" required>
                         <small class="text-muted">User will be suspended until this date (inclusive).</small>
+                    </div>
+
+                    <!-- Optional Evidence Upload -->
+                    <div class="mb-3">
+                        <label class="form-label">Supporting Evidence (Optional)</label>
+                        <input type="file" name="evidence_file" class="form-control" accept=".jpg,.jpeg,.png,.pdf,.xlsx,.xls,.doc,.docx">
+                        <div class="form-text text-muted">
+                            Upload screenshots, logs, or documents (Max: 10MB). Accepted: JPG, PNG, PDF, Excel, Word.
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-danger">Confirm Suspend</button>
+                    <button type="submit" class="btn btn-danger" id="suspendSubmitBtn">Suspend User</button>
                 </div>
             </form>
         </div>
@@ -682,6 +722,51 @@ function submitSuspend() {
         alert('Error: ' + err.message);
     });
 }
+
+// Show/hide custom reason field
+document.getElementById('predefinedReason').addEventListener('change', function() {
+    const customGroup = document.getElementById('customReasonGroup');
+    const customReason = document.querySelector('[name="custom_reason"]');
+    const finalReason = document.getElementById('finalReason');
+    
+    if (this.value === 'other') {
+        customGroup.style.display = 'block';
+        customReason.setAttribute('required', 'required');
+        finalReason.removeAttribute('required'); // Will be filled on submit
+    } else {
+        customGroup.style.display = 'none';
+        customReason.removeAttribute('required');
+        // Set final reason immediately
+        document.getElementById('finalReason').value = this.options[this.selectedIndex].text;
+    }
+});
+
+// Handle form submission
+document.getElementById('suspendForm').addEventListener('submit', function(e) {
+    const predefined = document.getElementById('predefinedReason').value;
+    const customReason = document.querySelector('[name="custom_reason"]').value;
+    const finalReason = document.getElementById('finalReason');
+    
+    if (predefined === 'other') {
+        if (!customReason.trim()) {
+            e.preventDefault();
+            alert('Please specify the reason.');
+            return;
+        }
+        finalReason.value = customReason.trim();
+    } else if (predefined) {
+        finalReason.value = document.getElementById('predefinedReason').options[document.getElementById('predefinedReason').selectedIndex].text;
+    } else {
+        e.preventDefault();
+        alert('Please select a reason.');
+        return;
+    }
+    
+    // Optional: Disable button to prevent double-submit
+    document.getElementById('suspendSubmitBtn').disabled = true;
+    document.getElementById('suspendSubmitBtn').innerHTML = '<span class="spinner-border spinner-border-sm"></span> Processing...';
+});
+
 // Set suspend form action when modal opens
 document.getElementById('suspendModal').addEventListener('show.bs.modal', function (event) {
     const button = event.relatedTarget;

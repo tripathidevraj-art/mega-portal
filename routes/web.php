@@ -43,12 +43,11 @@ Route::get('/', function () {
 | Jobs & Offers (Now Auth-Protected)
 |--------------------------------------------------------------------------
 */
+Route::get('/jobs/{id}', [JobController::class, 'show'])->name('jobs.show');
+Route::get('/offers/{id}', [OfferController::class, 'show'])->name('offers.show');
 Route::middleware('auth')->group(function () {
     Route::get('/jobs', [JobController::class, 'index'])->name('jobs.index');
-    Route::get('/jobs/{id}', [JobController::class, 'show'])->name('jobs.show');
-
     Route::get('/offers', [OfferController::class, 'index'])->name('offers.index');
-    Route::get('/offers/{id}', [OfferController::class, 'show'])->name('offers.show');
 });
 /*
 |--------------------------------------------------------------------------

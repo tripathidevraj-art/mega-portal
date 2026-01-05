@@ -405,6 +405,16 @@
                                         @endif
                                     </span>
                                 </div>
+                            @if($latestSuspensionLog && !empty($latestSuspensionLog->metadata['evidence_file']))
+                                <div class="info-row">
+                                    <label>Evidence:</label>
+                                    <a href="{{ asset('storage/' . $latestSuspensionLog->metadata['evidence_file']) }}" 
+                                    target="_blank" 
+                                    class="btn btn-sm btn-outline-secondary">
+                                        <i class="fas fa-paperclip"></i> View Evidence
+                                    </a>
+                                </div>
+                            @endif
                                 <div class="info-row">
                                     <span class="info-label">Created At</span>
                                     <span class="info-value">{{ $user->created_at->format('d M Y H:i') }}</span>

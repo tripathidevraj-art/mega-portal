@@ -35,7 +35,22 @@ public function admin()
         'full_name' => 'User'
     ]);
 }
-    
+
+public function getMetadataAttribute($value)
+{
+    if (is_array($value)) {
+        return $value;
+    }
+
+    if (is_string($value)) {
+        if (str_starts_with($value, '"{') && str_ends_with($value, '}"')) {
+            $value = json_decode($value, true); 
+        }
+        return json_decode($value, true) ?: [];
+    }
+
+    return [];
+}
     public function getActionBadgeClassAttribute()
     {
         $classes = [

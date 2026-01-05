@@ -18,29 +18,57 @@ use Illuminate\Support\Facades\Storage;
 class UserManagementController extends Controller
 {
 
-    public function suspendUser(SuspendUserRequest $request, $id)
-    {
-        $user = User::where('role', 'user')->findOrFail($id);
-        
-        $suspendedUntil = $request->validated('suspended_until');
-        $reason = $request->validated('reason');
+public function suspendUser(Request $request, $id)
+{
+    $request->validate([
+        'reason' => 'required|string|max:500',
+        'suspended_until' => 'required|date|after_or_equal:today',
+        'evidence_file' => 'nullable|file|mimes:jpg,jpeg,png,pdf,xlsx,xls,doc,docx|max:10240', // 10MB
+    ]);
 
-        DB::transaction(function () use ($user, $suspendedUntil, $reason) {
-            $user->update([
-                'status' => 'suspended',
-                'suspension_reason' => $reason,
-                'suspended_until' => $suspendedUntil, // ✅ use directly
-            ]);
+    $user = User::where('role', 'user')->findOrFail($id);
+    
+    $suspendedUntil = $request->input('suspended_until');
+    $reason = $request->input('reason');
 
-            // ... logging code ...
-        });
-
-        // Calculate duration for email (optional)
-        $durationDays = now()->diffInDays($suspendedUntil);
-        Mail::to($user->email)->send(new UserSuspended($user, $reason, $durationDays));
-
-        return back()->with('success', 'User suspended and email sent.');
+    // Handle evidence file
+    $evidencePath = null;
+    if ($request->hasFile('evidence_file')) {
+        $evidencePath = $request->file('evidence_file')->store('suspension-evidence', 'public');
     }
+
+    DB::transaction(function () use ($user, $suspendedUntil, $reason, $evidencePath) {
+        $user->update([
+            'status' => 'suspended',
+            'suspension_reason' => $reason,
+            'suspended_until' => $suspendedUntil,
+        ]);
+
+        // Save evidence path in logs (or create a new table later)
+        UserActivityLog::create([
+            'user_id' => $user->id,
+            'admin_id' => auth()->id(),
+            'action_type' => 'suspended',
+            'reason' => $reason,
+            'metadata' => $evidencePath ? json_encode(['evidence_file' => $evidencePath]) : null,
+        ]);
+
+        AdminActionLog::create([
+            'admin_id' => auth()->id(),
+            'action' => 'suspended_user',
+            'target_user_id' => $user->id,
+            'target_type' => 'user',
+            'target_id' => $user->id,
+            'reason' => $reason,
+            'metadata' => $evidencePath ? json_encode(['evidence_file' => $evidencePath]) : null,
+        ]);
+    });
+
+    $durationDays = now()->diffInDays($suspendedUntil);
+    Mail::to($user->email)->send(new UserSuspended($user, $reason, $durationDays));
+
+    return back()->with('success', 'User suspended and email sent.');
+}
 
     public function activateUser(ActivateUserRequest $request, $id)
     {
@@ -99,11 +127,26 @@ class UserManagementController extends Controller
         ]);
     }
     
-    public function showUserDetails($id)
-    {
-        $user = User::where('role', 'user')->findOrFail($id);
-        return view('admin.show', compact('user')); // ← NOT 'admin.users.show'
-    }
+// In UserManagementController.php
+public function showUserDetails($id)
+{
+    $user = User::where('role', 'user')->findOrFail($id);
+
+    $latestSuspensionLog = UserActivityLog::where('user_id', $user->id)
+        ->where('action_type', 'suspended')
+        ->latest()
+        ->first();
+
+    // 🔍 DEBUG: Log karein
+    \Log::info('User Suspension Log Debug', [
+        'user_id' => $user->id,
+        'has_log' => !is_null($latestSuspensionLog),
+        'log_metadata' => $latestSuspensionLog ? $latestSuspensionLog->metadata : 'No log',
+        'metadata_type' => $latestSuspensionLog ? gettype($latestSuspensionLog->metadata) : 'N/A',
+    ]);
+
+    return view('admin.show', compact('user', 'latestSuspensionLog'));
+}
 
     public function updateSection(Request $request, $id, $section)
     {

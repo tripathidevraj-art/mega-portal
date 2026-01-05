@@ -169,80 +169,87 @@ class AdminController extends Controller
         return view('admin.approval-queue', compact('pendingJobs', 'pendingOffers'));
     }
 
-    public function expiredContent(Request $request)
-    {
-        // ===== EXPIRED JOBS =====
-        $jobQuery = JobPosting::expired()->with(['user', 'approvedBy']);
+public function expiredContent(Request $request)
+{
+    // ===== EXPIRED JOBS =====
+    $jobQuery = JobPosting::expired()->with(['user', 'approvedBy']);
 
-        // Search
-        if ($request->filled('job_search')) {
-            $jobQuery->where(function($q) use ($request) {
-                $q->where('job_title', 'like', "%{$request->job_search}%")
-                ->orWhere('industry', 'like', "%{$request->job_search}%");
-            });
-        }
-
-        // Job Type Filter
-        if ($request->filled('job_type')) {
-            $jobQuery->where('job_type', $request->job_type);
-        }
-
-        // Date Range (Deadline)
-        if ($request->filled('job_deadline_from')) {
-            $jobQuery->whereDate('app_deadline', '>=', $request->job_deadline_from);
-        }
-        if ($request->filled('job_deadline_to')) {
-            $jobQuery->whereDate('app_deadline', '<=', $request->job_deadline_to);
-        }
-
-        // Sort
-        $jobSort = $request->get('job_sort', 'created_at');
-        $jobOrder = $request->get('job_order', 'desc');
-        $allowedJobSorts = ['app_deadline', 'views', 'created_at', 'job_title'];
-        if (!in_array($jobSort, $allowedJobSorts)) $jobSort = 'created_at';
-        $jobQuery->orderBy($jobSort, $jobOrder);
-
-        $expiredJobs = $jobQuery->get();
-
-        // ===== EXPIRED OFFERS =====
-        $offerQuery = ProductOffer::expired()->with(['user', 'approvedBy']);
-
-        // Search
-        if ($request->filled('offer_search')) {
-            $offerQuery->where(function($q) use ($request) {
-                $q->where('product_name', 'like', "%{$request->offer_search}%")
-                ->orWhere('category', 'like', "%{$request->offer_search}%");
-            });
-        }
-
-        // Discount Filter
-        if ($request->filled('offer_discount')) {
-            if ($request->offer_discount == 'has_discount') {
-                $offerQuery->where('discount', '>', 0);
-            } elseif ($request->offer_discount == 'no_discount') {
-                $offerQuery->where('discount', 0);
-            }
-        }
-
-        // Date Range (Expiry)
-        if ($request->filled('offer_expiry_from')) {
-            $offerQuery->whereDate('expiry_date', '>=', $request->offer_expiry_from);
-        }
-        if ($request->filled('offer_expiry_to')) {
-            $offerQuery->whereDate('expiry_date', '<=', $request->offer_expiry_to);
-        }
-
-        // Sort
-        $offerSort = $request->get('offer_sort', 'created_at');
-        $offerOrder = $request->get('offer_order', 'desc');
-        $allowedOfferSorts = ['expiry_date', 'price', 'views', 'created_at', 'product_name'];
-        if (!in_array($offerSort, $allowedOfferSorts)) $offerSort = 'created_at';
-        $offerQuery->orderBy($offerSort, $offerOrder);
-
-        $expiredOffers = $offerQuery->get();
-
-        return view('admin.expired-content', compact('expiredJobs', 'expiredOffers'));
+    // Search
+    if ($request->filled('job_search')) {
+        $jobQuery->where(function($q) use ($request) {
+            $q->where('job_title', 'like', "%{$request->job_search}%")
+              ->orWhere('industry', 'like', "%{$request->job_search}%");
+        });
     }
+
+    // Job Type Filter
+    if ($request->filled('job_type')) {
+        $jobQuery->where('job_type', $request->job_type);
+    }
+
+    // Date Range (Deadline)
+    if ($request->filled('job_deadline_from')) {
+        $jobQuery->whereDate('app_deadline', '>=', $request->job_deadline_from);
+    }
+    if ($request->filled('job_deadline_to')) {
+        $jobQuery->whereDate('app_deadline', '<=', $request->job_deadline_to);
+    }
+
+    // ✅ SORTING - Jobs (ALL columns now supported)
+    $jobSort = $request->get('job_sort', 'created_at');
+    $jobOrder = in_array($request->get('job_order'), ['asc', 'desc']) ? $request->get('job_order') : 'desc';
+
+    $allowedJobSorts = ['job_title', 'industry', 'job_type', 'work_location', 'app_deadline', 'views', 'created_at'];
+    if (!in_array($jobSort, $allowedJobSorts)) {
+        $jobSort = 'created_at';
+    }
+    $jobQuery->orderBy($jobSort, $jobOrder);
+
+    $expiredJobs = $jobQuery->get();
+
+
+    // ===== EXPIRED OFFERS =====
+    $offerQuery = ProductOffer::expired()->with(['user', 'approvedBy']);
+
+    // Search
+    if ($request->filled('offer_search')) {
+        $offerQuery->where(function($q) use ($request) {
+            $q->where('product_name', 'like', "%{$request->offer_search}%")
+              ->orWhere('category', 'like', "%{$request->offer_search}%");
+        });
+    }
+
+    // Discount Filter
+    if ($request->filled('offer_discount')) {
+        if ($request->offer_discount == 'has_discount') {
+            $offerQuery->where('discount', '>', 0);
+        } elseif ($request->offer_discount == 'no_discount') {
+            $offerQuery->where('discount', 0);
+        }
+    }
+
+    // Date Range (Expiry)
+    if ($request->filled('offer_expiry_from')) {
+        $offerQuery->whereDate('expiry_date', '>=', $request->offer_expiry_from);
+    }
+    if ($request->filled('offer_expiry_to')) {
+        $offerQuery->whereDate('expiry_date', '<=', $request->offer_expiry_to);
+    }
+
+    // ✅ SORTING - Offers (ALL columns now supported)
+    $offerSort = $request->get('offer_sort', 'created_at');
+    $offerOrder = in_array($request->get('offer_order'), ['asc', 'desc']) ? $request->get('offer_order') : 'desc';
+
+    $allowedOfferSorts = ['product_name', 'category', 'price', 'discount', 'expiry_date', 'views', 'created_at'];
+    if (!in_array($offerSort, $allowedOfferSorts)) {
+        $offerSort = 'created_at';
+    }
+    $offerQuery->orderBy($offerSort, $offerOrder);
+
+    $expiredOffers = $offerQuery->get();
+
+    return view('admin.expired-content', compact('expiredJobs', 'expiredOffers'));
+}
 
     public function userLogs(Request $request)
     {
