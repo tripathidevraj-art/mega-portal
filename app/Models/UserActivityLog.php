@@ -32,7 +32,7 @@ public function user()
 public function admin()
 {
     return $this->belongsTo(User::class, 'admin_id')->withDefault([
-        'full_name' => 'System'
+        'full_name' => 'User'
     ]);
 }
     

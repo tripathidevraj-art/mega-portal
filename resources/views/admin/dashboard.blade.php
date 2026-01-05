@@ -130,7 +130,6 @@
                         @endif
                     </a>
                 </div>
-                <!-- 👇 ALL REPORTS (History) -->
                 <div class="col-md-6 mb-3">
                     <a href="{{ route('admin.all-reported-jobs') }}" class="btn btn-info btn-block">
                         <i class="fas fa-clipboard-list"></i> All Reports
@@ -233,9 +232,9 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th>User</th>
-                                        <th>Action</th>
-                                        <th>Reason</th>
-                                        <th>By Admin</th>
+                                        <th>Activity</th>
+                                        <th>Activity Details</th>
+                                        <th>Done By</th>
                                         <th>Date</th>
                                     </tr>
                                 </thead>
@@ -250,20 +249,20 @@
                                                     <em>Deleted User</em>
                                                 @endif
                                             </td>
-<td>
-    <span class="badge {{ $activity->actionBadgeClass }}">
-        {{ ucfirst(str_replace('_', ' ', $activity->action_type)) }}
-    </span>
-    @if($activity->duration_days)
-        <br><small class="text-muted">{{ $activity->duration_days }} days</small>
-    @endif
-</td>
+                                        <td>
+                                            <span class="badge {{ $activity->actionBadgeClass }}">
+                                                {{ ucfirst(str_replace('_', ' ', $activity->action_type)) }}
+                                            </span>
+                                            @if($activity->duration_days)
+                                                <br><small class="text-muted">{{ $activity->duration_days }} days</small>
+                                            @endif
+                                        </td>
                                             <td>{{ Str::limit($activity->reason ?? 'No reason', 40) }}</td>
                                             <td>
                                                 @if($activity->admin)
                                                     {{ $activity->admin->full_name }}
                                                 @else
-                                                    <em>System</em>
+                                                    <em>User</em>
                                                 @endif
                                             </td>
                                             <td title="{{ $activity->created_at->format('M d, Y h:i A') }}">
@@ -287,9 +286,9 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th>Target User</th>
-                                        <th>Action</th>
-                                        <th>Reason</th>
-                                        <th>Admin</th>
+                                        <th>Activity</th>
+                                        <th>Activity Details</th>
+                                        <th>Done By</th>
                                         <th>Date</th>
                                     </tr>
                                 </thead>

@@ -26,12 +26,14 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('jobs.index') }}">Jobs</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('offers.index') }}">Promos</a>
-                    </li>
+    @auth
+        <li class="nav-item">
+            <a class="nav-link" href="{{ route('jobs.index') }}">Jobs</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ route('offers.index') }}">Offers</a>
+        </li>
+    @endauth
                   @auth
                         {{-- Super Admin --}}
                         @if(auth()->user()->isSuperAdmin())

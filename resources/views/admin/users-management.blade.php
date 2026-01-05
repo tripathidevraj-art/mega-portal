@@ -138,7 +138,7 @@
                 </div>
                 <div class="text-muted small fw-bold">Total</div>
                 <div class="fs-5 fw-bold text-primary">
-                    {{ $stats['verified'] + $stats['pending_verified'] + $stats['unverified'] + $stats['rejected'] + $stats['suspended'] }}
+                    {{ $stats['verified'] + $stats['pending_verified'] + $stats['rejected'] + $stats['suspended'] }}
                 </div>
             </div>
         </div>
