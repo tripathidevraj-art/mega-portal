@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Models\ReferralCode;
+use Illuminate\Support\Facades\DB;
 
 class User extends Authenticatable
 {
@@ -157,4 +159,85 @@ protected $fillable = [
     {
         return $this->role === 'admin' || $this->role === 'superadmin';
     }
+
+public function referralCode()
+{
+    return $this->hasOne(ReferralCode::class);
+}
+
+// Total referral points
+public function getTotalReferralPointsAttribute()
+{
+    return $this->referralsGiven()->sum('points_awarded');
+}
+
+// Relationship
+public function referralsGiven()
+{
+    return $this->hasMany(Referral::class, 'referrer_id');
+}
+
+// Global rank (cached)
+public function getReferralRankAttribute()
+{
+    return cache()->remember("user_{$this->id}_rank", 3600, function () {
+        return DB::table('referrals')
+            ->select(DB::raw('COUNT(DISTINCT referrer_id) + 1 as rank'))
+            ->where('points_awarded', '>', 
+                DB::table('referrals')
+                    ->select(DB::raw('SUM(points_awarded)'))
+                    ->where('referrer_id', $this->id)
+            )->first()->rank;
+    });
+}
+public function getReferralCodeAttribute()
+{
+    // Use the relationship query, not dynamic property
+    $code = $this->referralCode()->first();
+
+    if (!$code) {
+        $newCode = strtoupper(bin2hex(random_bytes(4)));
+        $code = ReferralCode::create([
+            'user_id' => $this->id,
+            'code' => $newCode
+        ]);
+    }
+
+    return $code;
+}
+
+public function getReferralTree()
+{
+    // Recursive method to build tree (for UI)
+    return $this->buildTree($this->id);
+}
+
+private function buildTree($userId, $depth = 0, $maxDepth = 10)
+{
+    if ($depth > $maxDepth) return [];
+
+    $directReferrals = User::whereHas('referralsReceived', function ($q) use ($userId) {
+        $q->where('referrer_id', $userId)->where('level', 1);
+    })->get();
+
+    $tree = [];
+    foreach ($directReferrals as $user) {
+        $tree[] = [
+            'user' => $user,
+            'children' => $this->buildTree($user->id, $depth + 1, $maxDepth)
+        ];
+    }
+
+    return $tree;
+}
+
+// For referrals received
+public function referralsReceived()
+{
+    return $this->hasMany(Referral::class, 'referred_id');
+}
+public function sentInvites()
+{
+    return $this->hasMany(ReferralInvite::class, 'user_id');
+}
 }

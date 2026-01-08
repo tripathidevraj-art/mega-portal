@@ -141,6 +141,9 @@
                 </li>
             </ul>
 
+            @if(request()->has('ref'))
+                <input type="hidden" name="referral_code" value="{{ request('ref') }}">
+            @endif
                     <!-- Tab Content -->
                     <div class="tab-content" id="formTabContent">
 

@@ -12,6 +12,9 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Str;
 use App\Mail\EmailVerificationMail;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
+use App\Models\ReferralCode;
+use App\Jobs\ProcessReferralTree;
 
 class RegisterController extends Controller
 {
@@ -50,33 +53,72 @@ class RegisterController extends Controller
      */
 public function register(Request $request)
 {
-        \Log::info('REGISTER REQUEST RECEIVED', $request->all());
+    Log::info('=== NEW REGISTRATION ATTEMPT ===', [
+        'ip' => $request->ip(),
+        'ref_code' => $request->get('ref'),
+        'email' => $request->email
+    ]);
+
     $this->validator($request->all())->validate();
 
     event(new Registered($user = $this->create($request->all())));
 
-    // 🔍 DEBUG: Log user & email
-    \Log::info('📧 PREPARING TO SEND EMAIL', [
+    // Generate referral code
+    $newCode = strtoupper(bin2hex(random_bytes(4)));
+    ReferralCode::create([
         'user_id' => $user->id,
-        'email' => $user->email,
-        'token' => $user->verification_token,
+        'code' => $newCode,
+    ]);
+    Log::info('Referral code generated for new user', [
+        'user_id' => $user->id,
+        'code' => $newCode
     ]);
 
+    // Handle referral
+        if ($refCode = $request->input('referral_code')) {
+        if (ReferralCode::where('code', $refCode)->exists()) {
+            ProcessReferralTree::dispatch($user->id, $refCode);
+            Log::info('✅ Referral job dispatched', ['code' => $refCode]);
+        } else {
+            Log::warning('❌ Invalid referral code', ['code' => $refCode]);
+        }
+    }
+    // if ($refCode = $request->get('ref')) {
+    //     Log::info('Referral code found in request', ['code' => $refCode]);
+
+    //     if (ReferralCode::where('code', $refCode)->exists()) {
+    //         Log::info('Referral code is VALID. Dispatching job...', [
+    //             'referrer_code' => $refCode,
+    //             'new_user_id' => $user->id
+    //         ]);
+    //         ProcessReferralTree::dispatch($user->id, $refCode);
+    //     } else {
+    //         Log::warning('Invalid referral code', ['code' => $refCode]);
+    //     }
+    // } else {
+    //     Log::info('No referral code in request');
+    // }
+// Auto-accept invite if contact matches
+$contact = $data['email']; // or phone if needed
+ReferralInvite::where('contact', $contact)
+    ->where('referral_code', $refCode)
+    ->where('accepted', false)
+    ->update([
+        'accepted' => true,
+        'accepted_at' => now()
+    ]);
+    // Email
     try {
         $this->sendVerificationEmail($user);
-        \Log::info('✅ EMAIL SEND CALLED SUCCESSFULLY', ['email' => $user->email]);
     } catch (\Exception $e) {
-        \Log::error('❌ EMAIL FAILED', [
-            'email' => $user->email,
-            'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString()
-        ]);
-        return back()->withErrors(['email' => 'Failed to send verification email: ' . $e->getMessage()]);
+        Log::error('Email failed', ['error' => $e->getMessage()]);
+        return back()->withErrors(['email' => 'Email failed']);
     }
 
-    return redirect()->route('register.success')->with('success', 
-        'Registration successful! Please check your email to verify your account.');
+    return redirect()->route('register.success')
+                     ->with('success', 'Registration successful!');
 }
+
 
     /**
      * Get a validator for an incoming registration request.

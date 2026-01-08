@@ -28,16 +28,25 @@ use App\Http\Controllers\SuperAdmin\AdminManagementController;
 // Middleware
 use App\Http\Middleware\CheckAdmin;
 use App\Http\Middleware\CheckSuperAdmin;
+use App\Models\User;
 
 /*
 |--------------------------------------------------------------------------
 | Public Routes
 |--------------------------------------------------------------------------
 */
+// Route::get('/', function () {
+//     return view('home');
+// })->name('home');
 Route::get('/', function () {
-    return view('home');
-})->name('home');
+    $topReferrers = User::whereHas('referralsGiven')
+        ->withSum('referralsGiven as total_points', 'points_awarded')
+        ->orderByDesc('total_points')
+        ->limit(10)
+        ->get();
 
+    return view('home', compact('topReferrers'));
+})->name('home');
 /*
 |--------------------------------------------------------------------------
 | Jobs & Offers (Now Auth-Protected)
@@ -48,6 +57,10 @@ Route::get('/offers/{id}', [OfferController::class, 'show'])->name('offers.show'
 Route::middleware('auth')->group(function () {
     Route::get('/jobs', [JobController::class, 'index'])->name('jobs.index');
     Route::get('/offers', [OfferController::class, 'index'])->name('offers.index');
+    Route::get('/referral/downline', [ProfileController::class, 'showDownline'])->name('user.referral.downline');
+    Route::post('/referral/invite', [ProfileController::class, 'sendInvite'])->name('referral.invite');
+    Route::get('/referral/invites', [ProfileController::class, 'viewInvites'])->name('referral.invites');
+    Route::post('/referral/resend/{id}', [ProfileController::class, 'resendInvite'])->name('referral.resend');
 });
 /*
 |--------------------------------------------------------------------------

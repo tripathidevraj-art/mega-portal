@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use App\Models\UserActivityLog;
+use App\Models\User;
+use App\Models\Referral;
+use App\Models\ReferralInvite;
 
 class ProfileController extends Controller
 {
@@ -140,5 +143,152 @@ public function update(Request $request)
     }
 
     return response()->json(['message' => 'Profile updated successfully!']);
+}
+
+public function showDownline()
+{
+    $user = auth()->user();
+
+    // Build full tree with YOU as root
+    $tree = [
+        'user' => $user,
+        'level' => 0,
+        'children' => $this->buildReferralTree($user->id, 1, 4) // max depth = 4
+    ];
+
+    return view('user.referral.downline', compact('tree'));
+}
+
+private function buildReferralTree($userId, $level, $maxLevel)
+{
+    if ($level > $maxLevel) {
+        return [];
+    }
+
+    $referrals = Referral::with('referred')
+        ->where('referrer_id', $userId)
+        ->where('level', 1)
+        ->get();
+
+    return $referrals->map(function ($ref) use ($level, $maxLevel) {
+        if (!$ref->referred) return null;
+
+        return [
+            'user' => $ref->referred,
+            'level' => $level,
+            'children' => $this->buildReferralTree($ref->referred->id, $level + 1, $maxLevel)
+        ];
+    })->filter()->values()->all();
+}
+
+public function sendInvite(Request $request)
+{
+    $request->validate([
+        'name' => 'required|string|max:100',
+        'contact' => 'required|string|max:50',
+        'type' => 'required|in:whatsapp,email',
+    ]);
+
+    $user = auth()->user();
+    $contact = $request->contact;
+    $type = $request->type;
+
+    if ($type === 'email') {
+        if (User::where('email', $contact)->exists()) {
+            return response()->json([
+                'error' => 'This email is already registered. They are already a member!'
+            ], 422);
+        }
+    } else {
+        // Clean phone: keep only digits
+        $phoneDigits = preg_replace('/[^0-9]/', '', $contact);
+        // Assume your `users.phone` stores only digits (no country code)
+        // Adjust logic if you store full number
+        if (strlen($phoneDigits) > 10) {
+            $phoneDigits = substr($phoneDigits, -10);
+        }
+        if (User::where('phone', $phoneDigits)->exists()) {
+            return response()->json([
+                'error' => 'This phone number is already registered. They are already a member!'
+            ], 422);
+        }
+    }
+
+    // ✅ 2. Check if invite already sent
+    $existingInvite = ReferralInvite::where('user_id', $user->id)
+        ->where('contact', $contact)
+        ->where('type', $type)
+        ->first();
+
+    if ($existingInvite) {
+        $timeAgo = $existingInvite->created_at->diffForHumans();
+        return response()->json([
+            'error' => "You already sent an invite to this {$type} {$timeAgo}."
+        ], 422);
+    }
+
+    // ✅ 3. Proceed to create & send
+    $code = $user->referral_code?->code;
+    if (!$code) {
+        return response()->json(['error' => 'Your referral code is missing.'], 500);
+    }
+
+    $link = url("/register?ref=$code");
+
+    ReferralInvite::create([
+        'user_id' => $user->id,
+        'name' => $request->name,
+        'contact' => $contact,
+        'type' => $type,
+        'referral_code' => $code,
+        'accepted' => false
+    ]);
+
+    // Send
+    if ($type === 'whatsapp') {
+        $text = urlencode("Hi {$request->name}! Join JobPortal via my link: $link");
+        $url = "https://wa.me/{$contact}?text=$text";
+        return response()->json(['redirect' => $url]);
+    } else {
+        try {
+            \Mail::to($contact)->send(new \App\Mail\ReferralInviteMail($user, $request->name, $link));
+            return response()->json(['message' => 'Invite sent successfully!']);
+        } catch (\Exception $e) {
+            \Log::error('Email send failed', [
+                'contact' => $contact,
+                'error' => $e->getMessage()
+            ]);
+            return response()->json(['error' => 'Failed to send email. Please try again.'], 500);
+        }
+    }
+}
+
+public function viewInvites()
+{
+    $invites = ReferralInvite::where('user_id', auth()->id())
+        ->latest()
+        ->paginate(20);
+
+    $stats = [
+        'invited' => ReferralInvite::where('user_id', auth()->id())->count(),
+        'accepted' => ReferralInvite::where('user_id', auth()->id())->where('accepted', true)->count(),
+    ];
+
+    return view('user.referral.invites', compact('invites', 'stats'));
+}
+
+public function resendInvite($id)
+{
+    $invite = ReferralInvite::where('user_id', auth()->id())->findOrFail($id);
+    $link = url("/register?ref={$invite->referral_code}");
+
+    if ($invite->type === 'whatsapp') {
+        $text = urlencode("Reminder: Join JobPortal via my link: $link");
+        // Can't auto-open WhatsApp in background — just show link
+        return redirect()->back()->with('resend', "wa.me/{$invite->contact}?text=$text");
+    } else {
+        \Mail::to($invite->contact)->send(new \App\Mail\ReferralInviteMail(auth()->user(), $invite->name, $link));
+        return back()->with('success', 'Invite re-sent!');
+    }
 }
 }

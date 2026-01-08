@@ -14,7 +14,7 @@ class Kernel extends ConsoleKernel
     {
         // Check for expired content - runs every hour
         $schedule->command('content:check-expired')->hourly();
-        
+         $schedule->command('app:update-referral-leaderboard')->everyTenMinutes();
         // Optional: Clean up old logs monthly
         // $schedule->command('logs:clean --days=90')->monthly();
     }

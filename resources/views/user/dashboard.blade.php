@@ -73,6 +73,33 @@
 </div>
 
 <div class="row">
+    <!-- In resources/views/user/dashboard.blade.php -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card bg-light">
+            <div class="card-body text-center">
+                <h5>Referral Points</h5>
+                <h2 class="text-primary">{{ Auth::user()->total_referral_points }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-light">
+            <div class="card-body text-center">
+                <h5>Total Referred</h5>
+                <h2 class="text-info">{{ Auth::user()->referralsGiven()->count() }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-light">
+            <div class="card-body text-center">
+                <h5>Global Rank</h5>
+                <h2 class="text-warning">#{{ Auth::user()->referral_rank }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
     <!-- Recent Jobs -->
     <div class="col-md-6 mb-4">
         <div class="card shadow">

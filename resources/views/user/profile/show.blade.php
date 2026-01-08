@@ -23,7 +23,6 @@
                 
                 <h4>{{ $user->full_name }}</h4>
                 <p class="text-muted">{{ $user->email }}</p>
-                
                 <div class="mb-3">
                     <span class="badge bg-{{ 
                         $user->status == 'verified' ? 'success' : 
@@ -38,7 +37,53 @@
                 </button>
             </div>
         </div>
+<!-- Referral Section -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5><i class="fas fa-share-alt me-2"></i> Invite Friends & Earn Points</h5>
+    </div>
+    <div class="card-body">
+        <p class="mb-3">Share your unique link to earn points:</p>
+        
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" id="inviteLink" 
+                   value="{{ url('/register?ref=' . Auth::user()->referral_code->code) }}" readonly>
+            <button class="btn btn-primary" type="button" onclick="copyInviteLink()">
+                <i class="fas fa-copy"></i> Copy
+            </button>
+        </div>
 
+        <!-- Referral QR Button -->
+        <button type="button" class="btn btn-outline-secondary w-100 mb-3" data-bs-toggle="modal" data-bs-target="#qrModal">
+            <i class="fas fa-qrcode me-1"></i> Show My QR Code
+        </button>
+
+        
+        <a href="{{ route('user.referral.downline') }}" class="btn btn-outline-primary w-100 mb-3">
+            <i class="fas fa-sitemap me-1"></i> My Downline
+        </a>
+        
+        <!-- Enhanced Invite Buttons -->
+        <div class="d-grid gap-2">
+            <button type="button" class="btn btn-success" onclick="openInviteModal('whatsapp')">
+                <i class="fab fa-whatsapp me-2"></i> Invite via WhatsApp
+            </button>
+            <button type="button" class="btn btn-primary" onclick="openInviteModal('email')">
+                <i class="fas fa-envelope me-2"></i> Invite via Email
+            </button>
+        </div>
+
+        <!-- Stats Buttons -->
+        <div class="d-flex justify-content-center gap-3 mt-3">
+            <a href="{{ route('referral.invites') }}" class="btn btn-sm btn-outline-info">
+                Invited: <span class="badge bg-info text-white">{{ Auth::user()->sentInvites()->count() }}</span>
+            </a>
+            <a href="{{ route('referral.invites') }}" class="btn btn-sm btn-outline-success">
+                Accepted: <span class="badge bg-success text-white">{{ Auth::user()->sentInvites()->where('accepted', true)->count() }}</span>
+            </a>
+        </div>
+            </div>
+        </div>
         <!-- Stats Card -->
         <div class="card shadow">
             <div class="card-header">
@@ -285,6 +330,7 @@
         </div>
     </div>
 </div>
+
 
 <!-- ============= MODALS ============= -->
 
@@ -572,6 +618,75 @@
         </div>
     </div>
 </div>
+<!-- Invite Modal -->
+<div class="modal fade" id="inviteModal" tabindex="-1">
+       <style>
+        .toast.bg-error {
+        background-color: #ef4444 !important;
+        color: white !important;
+        }
+        </style>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="inviteForm">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="inviteModalLabel">Invite Friend</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="inviteType" name="type">
+                    <div class="mb-3">
+                        <label class="form-label">Full Name *</label>
+                        <input type="text" class="form-control" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" id="contactLabel">WhatsApp Number *</label>
+                        <input type="text" class="form-control" name="contact" required placeholder="919876543210">
+                        <small class="form-text text-muted" id="contactHelp">Include country code (e.g., 91 for India)</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Send Invite</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- QR Code Modal -->
+<div class="modal fade" id="qrModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Your Referral QR Code</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <p class="text-muted mb-3">Scan to register instantly</p>
+                
+                <!-- QR Placeholder -->
+                <div id="qrContainer" class="d-inline-block">
+                    <div class="text-muted">Generating QR...</div>
+                </div>
+
+                <p class="mt-3 small text-muted">
+                    Code: <strong>{{ Auth::user()->referral_code->code }}</strong>
+                </p>
+            </div>
+<div class="modal-footer justify-content-center">
+    <button class="btn btn-sm btn-outline-primary" onclick="downloadQR()">
+        <i class="fas fa-download me-1"></i> Download PNG
+    </button>
+    {{-- <button class="btn btn-sm btn-success" onclick="openInviteVia('whatsapp')">
+        <i class="fab fa-whatsapp me-1"></i> WhatsApp
+    </button>
+    <button class="btn btn-sm btn-primary" onclick="openInviteVia('email')">
+        <i class="fas fa-envelope me-1"></i> Email
+    </button> --}}
+</div>
+        </div>
+    </div>
+</div>
 
 @endsection
 
@@ -673,5 +788,120 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize visuals
     updateBadges();
 });
+</script>
+@endpush
+@push('scripts')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+    function openInviteModal(type) {
+    const modal = new bootstrap.Modal(document.getElementById('inviteModal'));
+    document.getElementById('inviteType').value = type;
+    
+    const label = document.getElementById('contactLabel');
+    const help = document.getElementById('contactHelp');
+    
+    if (type === 'whatsapp') {
+        label.textContent = 'WhatsApp Number *';
+        help.textContent = 'Include country code (e.g., 91 for India)';
+        document.querySelector('[name="contact"]').placeholder = '919876543210';
+    } else {
+        label.textContent = 'Email Address *';
+        help.textContent = 'Valid email required';
+        document.querySelector('[name="contact"]').placeholder = 'friend@example.com';
+    }
+    
+    modal.show();
+}
+
+document.getElementById('inviteForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    
+try {
+const response = await fetch("{{ route('referral.invite') }}", {
+    method: 'POST',
+    credentials: 'same-origin',
+    headers: {
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+        'Accept': 'application/json'
+    },
+    body: formData
+}); 
+
+const result = await response.json();
+if (!response.ok) {
+    let msg = 'Failed to send invite.';
+    if (result.error) {
+        msg = result.error; // ✅ Use 'error' key, not 'message'
+    } else if (result.errors) {
+        msg = Object.values(result.errors)[0][0];
+    }
+    showToast('error', msg);
+    return;
+}
+
+    if (result.redirect) {
+        window.open(result.redirect, '_blank');
+    }
+    showToast('success', result.message || 'Invite sent!');
+    bootstrap.Modal.getInstance(document.getElementById('inviteModal')).hide();
+    e.target.reset();
+
+} catch (error) {
+    console.error('Network error:', error);
+    showToast('error', 'Network error. Please try again.');
+}
+});
+
+
+function generateQR() {
+    const qrContainer = document.getElementById('qrContainer');
+    qrContainer.innerHTML = '';
+
+    const url = "{{ url('/register?ref=' . Auth::user()->referral_code->code) }}";
+    
+    // Create a div for QR
+    const qrDiv = document.createElement('div');
+    qrDiv.id = 'qrcode';
+    qrDiv.style.margin = '0 auto';
+    qrContainer.appendChild(qrDiv);
+
+    // Generate QR (uses canvas by default, but we'll style it)
+    new QRCode(qrDiv, {
+        text: url,
+        width: 200,
+        height: 200,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.M
+    });
+}
+
+function downloadQR() {
+    const canvas = document.querySelector('#qrcode canvas');
+    if (!canvas) {
+        alert('QR not ready yet. Please wait.');
+        return;
+    }
+
+    const link = document.createElement('a');
+    link.download = 'referral-{{ Str::slug(Auth::user()->full_name, '') }}-{{ Auth::user()->referral_code->code }}RN.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+}
+
+// Generate QR when modal opens
+document.getElementById('qrModal').addEventListener('show.bs.modal', function () {
+    setTimeout(() => {
+        generateQR();
+    }, 100); // Small delay to ensure DOM is ready
+});
+
+function copyInviteLink() {
+    const link = document.getElementById('inviteLink');
+    link.select();
+    document.execCommand('copy');
+    alert('Invite link copied to clipboard!');
+}
 </script>
 @endpush
