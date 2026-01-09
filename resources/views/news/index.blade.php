@@ -76,23 +76,31 @@
                 </div>
             @endif
 
-            <!-- Title + Excerpt -->
-            <div class="flex-grow-1 min-w-0">
-                <h6 class="mb-1 fw-bold text-dark d-inline-block">
-                    <a href="{{ route('news.show', $item->id) }}" class="text-decoration-none hover-text-primary">
-                        {{ $item->title }}
-                    </a>
-                </h6>
-                <p class="text-muted small mb-0 d-inline-block ms-2">
-                    • {{ Str::limit($item->excerpt, 80) }}
-                </p>
-            </div>
-
             <!-- Date & CTA -->
-            <div class="d-flex align-items-center gap-2 flex-nowrap">
-                <span class="badge bg-light text-muted small">{{ $item->created_at->format('M d') }}</span>
-                <a href="{{ route('news.show', $item->id) }}" class="btn btn-sm btn-outline-primary">Read</a>
-            </div>
+<div class="d-flex flex-wrap align-items-center gap-3">
+    <!-- Title + Excerpt -->
+    <div class="flex-grow-1 min-w-0">
+        <h6 class="mb-1 fw-bold text-dark d-inline-block">
+            <a href="{{ route('news.show', $item->id) }}" class="text-decoration-none hover-text-primary">
+                {{ $item->title }}
+            </a>
+        </h6>
+        <p class="text-muted small mb-0 d-inline-block ms-2">
+            • {{ Str::limit($item->excerpt, 80) }}
+        </p>
+    </div>
+
+    <!-- Stats & CTA -->
+    <div class="d-flex align-items-center gap-3 flex-nowrap">
+        <div class="text-muted small d-flex align-items-center">
+            <i class="fas fa-eye me-1"></i> {{ number_format($item->views) }}
+        </div>
+        <div class="text-muted small d-flex align-items-center">
+            <i class="fas fa-heart me-1 text-danger"></i> {{ number_format($item->likes_count) }}
+        </div>
+        <a href="{{ route('news.show', $item->id) }}" class="btn btn-sm btn-outline-primary">Read</a>
+    </div>
+</div>
         </div>
         @endforeach
     </div>
@@ -113,19 +121,29 @@
                             <i class="fas fa-newspaper fa-3x text-secondary"></i>
                         </div>
                     @endif
-                    <div class="card-body d-flex flex-column">
-                        <div class="mb-2">
-                            <span class="badge bg-info">{{ $item->created_at->format('M d, Y') }}</span>
-                        </div>
-                        <h5 class="card-title mb-2">{{ $item->title }}</h5>
-                        <p class="text-muted small">{{ Str::limit($item->excerpt, 90) }}</p>
+<div class="card-body d-flex flex-column">
+    <div class="mb-2">
+        <span class="badge bg-info">{{ $item->created_at->format('M d, Y') }}</span>
+    </div>
+    <h5 class="card-title mb-2">{{ $item->title }}</h5>
+    <p class="text-muted small">{{ Str::limit($item->excerpt, 90) }}</p>
 
-                        <div class="mt-auto">
-                            <a href="{{ route('news.show', $item->id) }}" class="btn btn-sm btn-outline-primary w-100 mt-2">
-                                Read Full Article
-                            </a>
-                        </div>
-                    </div>
+    <div class="mt-auto">
+        <!-- Stats Row -->
+        <div class="d-flex justify-content-between align-items-center mt-2 text-muted small">
+            <span>
+                <i class="fas fa-eye me-1"></i> {{ number_format($item->views) }}
+            </span>
+            <span>
+                <i class="fas fa-heart me-1 text-danger"></i> {{ number_format($item->likes_count) }}
+            </span>
+        </div>
+
+        <a href="{{ route('news.show', $item->id) }}" class="btn btn-sm btn-outline-primary w-100 mt-3">
+            Read Full Article
+        </a>
+    </div>
+</div>
                 </div>
             </div>
             @endforeach

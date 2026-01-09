@@ -4,7 +4,7 @@
     "type": "module",
     "author": {
         "name": "Aryan Maurya",
-        "email": "aryanmaurya@innoricsystems.com"
+        "email": "aryan.maurya@innoricsystems.com"
     },
     "scripts": {
         "build": "vite build",

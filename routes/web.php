@@ -68,6 +68,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/referral/invite', [ProfileController::class, 'sendInvite'])->name('referral.invite');
     Route::get('/referral/invites', [ProfileController::class, 'viewInvites'])->name('referral.invites');
     Route::post('/referral/resend/{id}', [ProfileController::class, 'resendInvite'])->name('referral.resend');
+    Route::post('/news/{news}/like', [NewsController::class, 'toggleLike'])->name('news.like');
 });
 /*
 |--------------------------------------------------------------------------

@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\News;
 use App\Models\User;
+use App\Models\NewsLike;
 use Illuminate\Http\Request;
 use App\Mail\NewsPublishedMail;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
@@ -18,11 +20,22 @@ public function index()
     return view('admin.news.index', compact('news')); // ← admin view
 }
 
-    public function show($id)
-    {
-        $news = News::findOrFail($id);
-        return view('news.show', compact('news')); // Public view uses non-admin layout
+public function show($id)
+{
+    $news = News::where('is_published', true)
+        ->where(fn($q) => $q->where('published_at', '<=', now())->orWhereNull('published_at'))
+        ->findOrFail($id);
+
+    // Only increment views once per session (optional but recommended)
+    if (!session()->has("news_viewed_{$news->id}")) {
+        $news->increment('views');
+        session(["news_viewed_{$news->id}" => true]);
     }
+    if (request()->route()->getPrefix() === 'admin') {
+        return view('admin.news.show', compact('news'));
+    }
+    return view('news.show', compact('news'));
+}
 
 public function publicIndex(Request $request)
 {
@@ -56,7 +69,7 @@ public function publicIndex(Request $request)
             $query->latest();
     }
 
-    $news = $query->paginate(12);
+    $news = $query->withCount('likes')->paginate(12);
 
     return view('news.index', compact('news', 'view', 'search', 'sort'));
 }
@@ -159,5 +172,37 @@ public function publicIndex(Request $request)
 
         return redirect()->route('admin.news.index')
             ->with('success', 'News article deleted successfully!');
+    }
+
+    public function toggleLike(Request $request, News $news)
+    {
+        if (!auth()->check()) {
+            return response()->json(['error' => 'Login required'], 401);
+        }
+
+        $userId = auth()->id();
+        $exists = NewsLike::where('news_id', $news->id)
+                        ->where('user_id', $userId)
+                        ->exists();
+
+        if ($exists) {
+            NewsLike::where('news_id', $news->id)
+                    ->where('user_id', $userId)
+                    ->delete();
+            $liked = false;
+        } else {
+            NewsLike::create([
+                'news_id' => $news->id,
+                'user_id' => $userId,
+            ]);
+            $liked = true;
+        }
+
+        $newCount = NewsLike::where('news_id', $news->id)->count();
+
+        return response()->json([
+            'liked' => $liked,
+            'count' => $newCount
+        ]);
     }
 }

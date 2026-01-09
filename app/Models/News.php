@@ -14,6 +14,7 @@ class News extends Model
         'is_published',
         'published_at',
         'admin_id',
+        'views',
     ];
 
     // Optional: Cast boolean & dates
@@ -21,4 +22,21 @@ class News extends Model
         'is_published' => 'boolean',
         'published_at' => 'datetime',
     ];
+
+        // Relationships
+    public function likes()
+    {
+        return $this->hasMany(NewsLike::class);
+    }
+
+    public function likedByUser()
+    {
+        return $this->likes()->where('user_id', auth()->id())->exists();
+    }
+
+    // Accessor for total likes
+    public function getLikesCountAttribute()
+    {
+        return $this->likes()->count();
+    }
 }

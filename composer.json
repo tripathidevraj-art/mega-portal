@@ -70,6 +70,13 @@
             "Illuminate\\Foundation\\ComposerScripts::prePackageUninstall"
         ]
     },
+    "authors": [
+        {
+            "name": "Aryan Maurya",
+            "email": "aryan.maurya@innoricsystems.com",
+            "role": "Lead Full Stack Developer"
+        }
+    ],
     "extra": {
         "laravel": {
             "dont-discover": []
