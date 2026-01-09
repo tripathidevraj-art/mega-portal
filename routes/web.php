@@ -30,6 +30,9 @@ use App\Http\Middleware\CheckAdmin;
 use App\Http\Middleware\CheckSuperAdmin;
 use App\Models\User;
 
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\Admin\NewsController;
+
 /*
 |--------------------------------------------------------------------------
 | Public Routes
@@ -38,15 +41,16 @@ use App\Models\User;
 // Route::get('/', function () {
 //     return view('home');
 // })->name('home');
-Route::get('/', function () {
-    $topReferrers = User::whereHas('referralsGiven')
-        ->withSum('referralsGiven as total_points', 'points_awarded')
-        ->orderByDesc('total_points')
-        ->limit(10)
-        ->get();
+Route::get('/', [HomeController::class, 'index'])->name('home');
+// Route::get('/', function () {
+//     $topReferrers = User::whereHas('referralsGiven')
+//         ->withSum('referralsGiven as total_points', 'points_awarded')
+//         ->orderByDesc('total_points')
+//         ->limit(10)
+//         ->get();
 
-    return view('home', compact('topReferrers'));
-})->name('home');
+//     return view('home', compact('topReferrers'));
+// })->name('home');
 /*
 |--------------------------------------------------------------------------
 | Jobs & Offers (Now Auth-Protected)
@@ -54,6 +58,9 @@ Route::get('/', function () {
 */
 Route::get('/jobs/{id}', [JobController::class, 'show'])->name('jobs.show');
 Route::get('/offers/{id}', [OfferController::class, 'show'])->name('offers.show');
+// Route::get('/news', [NewsController::class, 'index'])->name('news.index');
+Route::get('/news', [NewsController::class, 'publicIndex'])->name('news.index');
+Route::get('/news/{id}', [NewsController::class, 'show'])->name('news.show');
 Route::middleware('auth')->group(function () {
     Route::get('/jobs', [JobController::class, 'index'])->name('jobs.index');
     Route::get('/offers', [OfferController::class, 'index'])->name('offers.index');
@@ -222,6 +229,8 @@ Route::middleware(['auth', 'admin'])
         // Admin profile routes
         Route::get('/profile', [AdminProfileController::class, 'show'])->name('profile');
         Route::post('/profile', [AdminProfileController::class, 'update'])->name('profile.update');
+
+         Route::resource('news', NewsController::class);
     });
 
 /*

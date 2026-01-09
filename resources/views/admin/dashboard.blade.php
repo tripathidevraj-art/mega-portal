@@ -118,7 +118,6 @@
                         <span class="badge bg-light text-dark">{{ $stats['expired_jobs'] + $stats['expired_offers'] }}</span>
                     </a>
                 </div>
-                <!-- 👇 REPORTED JOBS (Pending) -->
                 <div class="col-md-6 mb-3">
                     <a href="{{ route('admin.reported-jobs') }}" class="btn btn-danger btn-block">
                         <i class="fas fa-exclamation-triangle"></i> Reported Jobs
@@ -143,6 +142,16 @@
                 <div class="col-md-6 mb-3">
                     <a href="{{ route('admin.user-analytics') }}" class="btn btn-success btn-block">
                         <i class="fas fa-chart-line"></i> User Analytics
+                    </a>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <a href="{{ route('admin.news.create') }}" class="btn btn-primary btn-block">
+                        <i class="fas fa-edit me-1"></i> Write News
+                    </a>
+                </div>
+                 <div class="col-md-6 mb-3">
+                    <a href="{{ route('admin.news.index') }}" class="btn btn-primary btn-block">
+                        <i class="fas fa-clipboard-list"></i> All News
                     </a>
                 </div>
             </div>

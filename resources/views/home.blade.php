@@ -26,6 +26,49 @@
 
 {{-- ================= AUTH VIEW ================= --}}
 @auth
+<!-- Latest News Section -->
+<section class="py-4">
+    <div class="container">
+        <h3 class="mb-4">Latest Updates</h3>
+        
+        @if($latestNews->count())
+            <div class="row g-3">
+                @foreach($latestNews as $news)
+                <div class="col-12">
+                    <div class="border rounded p-3 bg-white shadow-sm hover-shadow" style="cursor: pointer;" onclick="window.location='{{ route('news.show', $news->id) }}'">
+                        <div class="d-flex gap-3">
+                            @if($news->image)
+                                <div class="flex-shrink-0" style="width: 70px; height: 70px; overflow: hidden; border-radius: 8px;">
+                                    <img src="{{ asset('storage/'.$news->image) }}" 
+                                         class="w-100 h-100 object-fit-cover" 
+                                         alt="{{ $news->title }}">
+                                </div>
+                            @endif
+                            <div>
+                                <h5 class="mb-1 text-dark">{{ $news->title }}</h5>
+                                <p class="text-muted mb-1" style="font-size: 0.95rem; line-height: 1.4;">
+                                    {{ Str::limit($news->excerpt, 100) }}
+                                </p>
+                                <small class="text-muted">{{ $news->created_at->format('M d, Y') }}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+
+            @if($latestNews->count() >= 5)
+            <div class="text-center mt-4">
+                <a href="{{ route('news.index') }}" class="btn btn-outline-primary">
+                    View All News &rarr;
+                </a>
+            </div>
+            @endif
+        @else
+            <p class="text-muted text-center">No news available at the moment.</p>
+        @endif
+    </div>
+</section>
 <!-- Top Referrers Section -->
 @if($topReferrers->count())
 <div class="card mb-5">

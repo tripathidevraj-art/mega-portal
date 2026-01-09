@@ -2,47 +2,37 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Cache;
+// ✅ Explicitly import the correct base controller
+use App\Http\Controllers\Controller;
+
+use App\Models\User;
+use App\Models\News;
 
 class HomeController extends Controller
 {
-    /**
-     * Create a new controller instance.
-     */
     public function __construct()
     {
+        // ✅ Now this will work
         $this->middleware('auth');
     }
 
-    /**
-     * Show the application dashboard.
-     */
     public function index()
     {
-        $userId = auth()->id();
-
-        // Cached leaderboard (top 100)
-        $leaderboard = Cache::remember('referral_leaderboard', 600, function () {
-            return DB::table('referrals')
-                ->select('referrer_id', DB::raw('SUM(points_awarded) as total_points'))
-                ->groupBy('referrer_id')
-                ->orderByDesc('total_points')
-                ->limit(100)
-                ->get();
-        });
-
-        // User rank (computed live for MVP)
-        $yourRank = DB::table('referrals')
-            ->select(DB::raw('COUNT(DISTINCT referrer_id) + 1 as rank'))
-            ->where('points_awarded', '>', function ($q) use ($userId) {
-                $q->select(DB::raw('SUM(points_awarded)'))
-                    ->from('referrals')
-                    ->where('referrer_id', $userId);
+        $latestNews = News::where('is_published', true)
+            ->where(function ($query) {
+                $query->where('published_at', '<=', now())
+                      ->orWhereNull('published_at');
             })
-            ->value('rank');
+            ->latest()
+            ->take(10)
+            ->get();
 
-        return view('home', compact('leaderboard', 'yourRank'));
+        $topReferrers = User::whereHas('referralsGiven')
+            ->withSum('referralsGiven as total_points', 'points_awarded')
+            ->orderByDesc('total_points')
+            ->limit(10)
+            ->get();
+
+        return view('home', compact('latestNews', 'topReferrers'));
     }
 }
