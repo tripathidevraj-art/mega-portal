@@ -84,6 +84,53 @@
         </div>
             </div>
         </div>
+        <!-- Volunteer & Additional -->
+        <div class="card shadow mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="mb-0">Interests & Notes</h6>
+                <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editInterestsModal">
+                    <i class="fas fa-edit"></i>
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <small class="text-muted">Volunteer Interests</small>
+                <p>
+                    @php
+                        $raw = $user->volunteer_interests ?? '';
+
+                        if (empty($raw)) {
+                            $result = '';
+                        } else {
+                            // Step 1: Convert to string if array
+                            if (is_array($raw)) {
+                                $raw = implode(', ', $raw);
+                            }
+
+                            // Step 2: Remove ALL special characters EXCEPT letters, spaces, and commas
+                            // This will destroy JSON, quotes, brackets, slashes — everything
+                            $clean = preg_replace('/[^a-zA-Z0-9,\s]/', '', $raw);
+
+                            // Step 3: Split by comma, trim, remove empty
+                            $parts = array_filter(array_map('trim', explode(',', $clean)), fn($s) => !empty($s));
+
+                            // Step 4: Remove any leftover numeric-only or very short garbage
+                            $parts = array_filter($parts, fn($s) => strlen($s) > 2 && !is_numeric($s));
+
+                            // Step 5: Re-index and join
+                            $result = implode(', ', array_values($parts));
+                        }
+                    @endphp
+
+                    {{ $result ?: 'Not specified' }}
+                </p>
+                </div>
+                <div>
+                    <small class="text-muted">Additional Information</small>
+                    <p>{{ $user->additional_info ?? 'None' }}</p>
+                </div>
+            </div>
+        </div>
         <!-- Stats Card -->
         <div class="card shadow">
             <div class="card-header">
@@ -251,7 +298,7 @@
         </div>
 
 <!-- Volunteer & Additional -->
-<div class="card shadow mb-4">
+{{-- <div class="card shadow mb-4">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h6 class="mb-0">Interests & Notes</h6>
         <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editInterestsModal">
@@ -296,7 +343,7 @@
             <p>{{ $user->additional_info ?? 'None' }}</p>
         </div>
     </div>
-</div>
+</div> --}}
 
         <!-- Activity Log -->
         <div class="card shadow">
