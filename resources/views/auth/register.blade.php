@@ -314,8 +314,13 @@
     .is-invalid:focus {
         box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1) !important;
     }
-    
-    /* Responsive */
+    .footer-premium{
+        margin-top:0 !important;
+    }
+
+    /* ========================
+            Responsive
+    ======================= */
     @media (max-width: 768px) {
         .form-content {
             padding: 1.5rem;
@@ -613,19 +618,21 @@
                                 <div class="form-section">
                                     <h3 class="section-title"><i class="fas fa-file-alt"></i> Document Details</h3>
                                     
-                                    <div class="mb-3">
-                                        <label class="form-label"><i class="fas fa-fingerprint"></i> National / Civil ID</label>
-                                        <input type="text" class="form-control @error('civil_id') is-invalid @enderror" 
-                                               name="civil_id" value="{{ old('civil_id') }}">
-                                        @error('civil_id')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
-                                    </div>
+                                    <div class="row g-3 mt-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label"><i class="fas fa-fingerprint"></i> National / Civil ID</label>
+                                            <input type="text" class="form-control @error('civil_id') is-invalid @enderror" 
+                                                name="civil_id" value="{{ old('civil_id') }}">
+                                            @error('civil_id')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                                        </div>
 
-                                    <div class="mb-3">
-                                        <label class="form-label"><i class="fas fa-upload"></i> Upload Civil ID Copy</label>
-                                        <input type="file" class="form-control @error('civil_id_file') is-invalid @enderror" 
-                                               name="civil_id_file" accept="image/*,.pdf">
-                                        <small class="text-muted d-block mt-1">Allowed: JPG, PNG, PDF (Max 5MB)</small>
-                                        @error('civil_id_file')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                                        <div class="col-md-6">
+                                            <label class="form-label"><i class="fas fa-upload"></i> Upload Civil ID Copy</label>
+                                            <input type="file" class="form-control @error('civil_id_file') is-invalid @enderror" 
+                                                name="civil_id_file" accept="image/*,.pdf">
+                                            <small class="text-muted d-block mt-1">Allowed: JPG, PNG, PDF (Max 5MB)</small>
+                                            @error('civil_id_file')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                                        </div>
                                     </div>
 
                                     <div class="row g-3 mt-3">
