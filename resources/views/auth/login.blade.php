@@ -15,9 +15,9 @@
         margin:0;
         padding:0;
     }
-    .footer-premium{
+    /* .footer-premium{
         margin-top:0 !important;
-    }
+    } */
     /* Animated Background Container */
     .login-container {
         min-height: calc(100vh - 200px);

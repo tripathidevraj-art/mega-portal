@@ -314,7 +314,7 @@
             background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
             color: #d1d5db;
             padding: 3rem 0 2rem;
-            margin-top: 4rem;
+            /* margin-top: 4rem; */
             border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
         

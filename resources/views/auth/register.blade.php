@@ -314,9 +314,9 @@
     .is-invalid:focus {
         box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1) !important;
     }
-    .footer-premium{
+    /* .footer-premium{
         margin-top:0 !important;
-    }
+    } */
 
     /* ========================
             Responsive
